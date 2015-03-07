@@ -1,0 +1,122 @@
+__PIPELINE_INFO__: 
+    name: 
+    version: 
+    author: 
+    data_type: 
+    input_type: 
+    output_type: 
+    host_cluster: 
+    date_created: 
+    date_last_updated: 
+    factory_version: '1.10.0'
+__GENERAL__: 
+    python: 
+    java: 
+    R: 
+__SHARED__: 
+__SAMPLES__: 
+    # sample_id:
+    #    param1: value1
+    #    param2: value2
+
+__TASK_1__: 
+    reserved: 
+        # do not change this section.
+        component_name: 'clipoverlap'
+        component_version: '1.0.0'
+        seed_version: '2.16'
+    run: 
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: False
+        memory: '5G'
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars: 
+        boilerplate: 
+    component: 
+        input_files: 
+            input_file: '__REQUIRED__'
+        output_files: 
+            output_file: '__REQUIRED__'
+        parameters: 
+__TASK_2__: 
+    reserved: 
+        # do not change this section.
+        component_name: 'run_strelka'
+        component_version: '1.1.0'
+        seed_version: '1.0.13'
+    run: 
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: False
+        memory: '7G'
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars: 
+        boilerplate: 
+    component: 
+        input_files: 
+            tumor: '__REQUIRED__'
+            config: '__OPTIONAL__'
+            ref: '__REQUIRED__'
+            normal: '__REQUIRED__'
+        output_files: 
+            output_dir: '__REQUIRED__'
+        parameters: 
+            num_cores: 8
+__TASK_3__: 
+    reserved: 
+        # do not change this section.
+        component_name: 'ensembl_vep'
+        component_version: '1.0.0'
+        seed_version: 'v76'
+    run: 
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: False
+        memory: '1G'
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars: 
+        boilerplate: 
+    component: 
+        input_files: 
+            input_file: '__REQUIRED__'
+        output_files: 
+            output_file: '__REQUIRED__'
+        parameters: 
+            fork: '__OPTIONAL__'
+            assembly: 'GRCh37'
+            no_escape: True
+            total_length: True
+            fasta: '__REQUIRED__'
+            vcf: True
+            xref_refseq: True
+            check_existing: True
+            allele_number: True
+            quiet: True
+            everything: True
+            gencode_basic: True
+            no_stats: True
+            offline: True
+            dir: '__REQUIRED__'
+__TASK_4__: 
+    reserved: 
+        # do not change this section.
+        component_name: 'vcf2maf'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.5.0'
+    run: 
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: False
+        memory: '1G'
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars: 
+        boilerplate: 
+    component: 
+        input_files: 
+            input_vep: '__REQUIRED__'
+        output_files: 
+            output_maf: '__REQUIRED__'
+        parameters: 
+            normal_id: '__OPTIONAL__'
+            tumour_id: '__OPTIONAL__'
