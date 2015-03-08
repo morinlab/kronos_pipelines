@@ -112,7 +112,7 @@ __TASK_4__:
         seed_version: 'v1.5.0'
     run: 
         # NOTE: component cannot run in parallel mode.
-        use_cluster: False
+        use_cluster: True
         memory: '1G'
         forced_dependencies: []
         add_breakpoint: False
@@ -170,7 +170,7 @@ __TASK_6__:
         seed_version: 'v1.5.0'
     run: 
         # NOTE: component cannot run in parallel mode.
-        use_cluster: False
+        use_cluster: True
         memory: '1G'
         forced_dependencies: []
         add_breakpoint: False
