@@ -66,7 +66,7 @@ __TASK_2__:
             ref: ("__SHARED__", "reference")
             normal: ("__SAMPLES__", "normal_bam")
         output_files: 
-            output_dir: "$sample_id_strelka_results"
+            output_dir: "$sample_id-strelka_results"
         parameters: 
             num_cores: 6
 __TASK_3__: 
