@@ -1,24 +1,30 @@
 __PIPELINE_INFO__: 
-    name: 
-    version: 
-    author: 
+    name: "strelka_vcf2maf_pipeline"
+    version: "v1.0.0"
+    author: "bgrande"
     data_type: 
     input_type: 
     output_type: 
-    host_cluster: 
-    date_created: 
-    date_last_updated: 
+    host_cluster: "genesis"
+    date_created: "7 Mar 2015"
+    date_last_updated: "7 Mar 2015"
     factory_version: '1.10.0'
 __GENERAL__: 
-    python: 
-    java: 
-    R: 
+    python: "python"
+    bamutils: "/home/jgrewal/software/bamutil/bamUtil/bin/"
+    strelka: "/genesis/extscratch/shahlab/softwares/strelka_workflow-1.0.13/bin/configureStrelkaWorkflow.pl"
+    perl: "perl"
+    variant_effect_predictor: "/home/bgrande/software/genesis/variant_effect_predictor-76/variant_effect_predictor.pl"
+    vcf2maf: "/home/bgrande/software/genesis/vcf2maf-1.5.0/vcf2maf.pl"
 __SHARED__: 
+    reference: "/extscratch/morinlab/projects/MCL_meta_analysis/reference/hg19_campo_cohort.fa"
+    vep_data: '/extscratch/morinlab/shared/common/.vep/'
 __SAMPLES__: 
-    # sample_id:
-    #    param1: value1
-    #    param2: value2
-
+    M003-Tumor-PB2:
+        tumour_bam: "/extscratch/morinlab/projects/MCL_meta_analysis/data/bam_alignments/campo_cohort/M003-Tumor-PB2.bam"
+        tumour_id: "M003-Tumor-PB2"
+        normal_bam: "/extscratch/morinlab/projects/MCL_meta_analysis/data/bam_alignments/campo_cohort/M003-Normal.bam"
+        normal_id: "M003-Normal"
 __TASK_1__: 
     reserved: 
         # do not change this section.
@@ -27,7 +33,7 @@ __TASK_1__:
         seed_version: '2.16'
     run: 
         # NOTE: component cannot run in parallel mode.
-        use_cluster: False
+        use_cluster: True
         memory: '5G'
         forced_dependencies: []
         add_breakpoint: False
@@ -35,9 +41,9 @@ __TASK_1__:
         boilerplate: 
     component: 
         input_files: 
-            input_file: '__REQUIRED__'
+            input_file: ("__SAMPLES__", "tumour_bam")
         output_files: 
-            output_file: '__REQUIRED__'
+            output_file: "$sample_id.clipoverlap.bam"
         parameters: 
 __TASK_2__: 
     reserved: 
@@ -47,7 +53,7 @@ __TASK_2__:
         seed_version: '1.0.13'
     run: 
         # NOTE: component cannot run in parallel mode.
-        use_cluster: False
+        use_cluster: True
         memory: '7G'
         forced_dependencies: []
         add_breakpoint: False
@@ -55,14 +61,14 @@ __TASK_2__:
         boilerplate: 
     component: 
         input_files: 
-            tumor: '__REQUIRED__'
+            tumor: ("__TASK_1__", "output_file")
             config: '__OPTIONAL__'
-            ref: '__REQUIRED__'
-            normal: '__REQUIRED__'
+            ref: ("__SHARED__", "reference")
+            normal: ("__SAMPLES__", "normal_bam")
         output_files: 
-            output_dir: '__REQUIRED__'
+            output_dir: "$sample_id_strelka_results"
         parameters: 
-            num_cores: 8
+            num_cores: 6
 __TASK_3__: 
     reserved: 
         # do not change this section.
@@ -71,23 +77,23 @@ __TASK_3__:
         seed_version: 'v76'
     run: 
         # NOTE: component cannot run in parallel mode.
-        use_cluster: False
-        memory: '1G'
-        forced_dependencies: []
+        use_cluster: True
+        memory: '4G'
+        forced_dependencies: ["__TASK_2__"]
         add_breakpoint: False
         env_vars: 
         boilerplate: 
     component: 
         input_files: 
-            input_file: '__REQUIRED__'
+            input_file: "passed.somatic.snvs.vcf"
         output_files: 
-            output_file: '__REQUIRED__'
+            output_file: "passed.somatic.snvs.vep.vcf"
         parameters: 
-            fork: '__OPTIONAL__'
+            fork: 6
             assembly: 'GRCh37'
             no_escape: True
             total_length: True
-            fasta: '__REQUIRED__'
+            fasta: ("__SHARED__", "reference")
             vcf: True
             xref_refseq: True
             check_existing: True
@@ -97,7 +103,7 @@ __TASK_3__:
             gencode_basic: True
             no_stats: True
             offline: True
-            dir: '__REQUIRED__'
+            dir: ("__SHARED__", "vep_data")
 __TASK_4__: 
     reserved: 
         # do not change this section.
@@ -114,9 +120,67 @@ __TASK_4__:
         boilerplate: 
     component: 
         input_files: 
-            input_vep: '__REQUIRED__'
+            input_vep: ("__TASK_3__", "output_file")
         output_files: 
-            output_maf: '__REQUIRED__'
+            output_maf: $sample_id.snvs.maf
         parameters: 
-            normal_id: '__OPTIONAL__'
-            tumour_id: '__OPTIONAL__'
+            normal_id: ("__SAMPLES__", "normal_id")
+            tumour_id: ("__SAMPLES__", "tumour_id")
+
+__TASK_5__: 
+    reserved: 
+        # do not change this section.
+        component_name: 'ensembl_vep'
+        component_version: '1.0.0'
+        seed_version: 'v76'
+    run: 
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: '4G'
+        forced_dependencies: ["__TASK_2__"]
+        add_breakpoint: False
+        env_vars: 
+        boilerplate: 
+    component: 
+        input_files: 
+            input_file: "passed.somatic.indels.vcf"
+        output_files: 
+            output_file: "passed.somatic.indels.vep.vcf"
+        parameters: 
+            fork: 6
+            assembly: 'GRCh37'
+            no_escape: True
+            total_length: True
+            fasta: ("__SHARED__", "reference")
+            vcf: True
+            xref_refseq: True
+            check_existing: True
+            allele_number: True
+            quiet: True
+            everything: True
+            gencode_basic: True
+            no_stats: True
+            offline: True
+            dir: ("__SHARED__", "vep_data")
+__TASK_6__: 
+    reserved: 
+        # do not change this section.
+        component_name: 'vcf2maf'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.5.0'
+    run: 
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: False
+        memory: '1G'
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars: 
+        boilerplate: 
+    component: 
+        input_files: 
+            input_vep: ("__TASK_5__", "output_file")
+        output_files: 
+            output_maf: $sample_id.indels.maf
+        parameters: 
+            normal_id: ("__SAMPLES__", "normal_id")
+            tumour_id: ("__SAMPLES__", "tumour_id")
