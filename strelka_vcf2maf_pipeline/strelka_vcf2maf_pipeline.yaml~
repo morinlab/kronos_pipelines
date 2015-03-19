@@ -17,7 +17,7 @@ __GENERAL__:
     variant_effect_predictor: "/home/bgrande/software/genesis/variant_effect_predictor-76/variant_effect_predictor.pl"
     vcf2maf: "/home/bgrande/software/genesis/vcf2maf-1.5.0/vcf2maf.pl"
 __SHARED__: 
-    reference: "/extscratch/morinlab/projects/MCL_meta_analysis/reference/hg19_campo_cohort.fixed_width.fa"
+    reference: "/extscratch/morinlab/projects/MCL_meta_analysis/reference/hg19_campo_cohort.fa"
     vep_data: '/extscratch/morinlab/shared/common/.vep/'
 __SAMPLES__: 
     M003-Tumor-PB2:
