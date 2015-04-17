@@ -1,0 +1,624 @@
+__PIPELINE_INFO__: 
+    name: 'realignment_pipeline' 
+    version: 'v.1.0.0'
+    author: 'jgrewal'
+    data_type: 'bam'
+    input_type: 'bam'
+    output_type: 'fastq'
+    host_cluster: 'genesis'
+    date_created: '31 March 2015'
+    date_last_updated: '17 April 2015'
+    factory_version: '1.10.2'
+__GENERAL__:
+    bamutils: '/home/jgrewal/software/bamUtil/bin/bam' 
+    bwa: '/extscratch/morinlab/software/bwa-0.7.12/bwa'
+    python: '/extscratch/morinlab/projects/MCL_realignment/software/python'
+    picardtools: '/home/jgrewal/software/picard/picard-tools-1.119/'
+    java: '/extscratch/morinlab/projects/MCL_realignment/software/java/'
+    R: '/extscratch/morinlab/projects/MCL_realignment/software/R'
+    samtools: '/extscratch/morinlab/projects/MCL_realignment/software/samtools/samtools'
+    convert_bam_to_fastq.py: '/extscratch/morinlab/software/lab_scripts/convert_bam_to_fastq/convert_bam_to_fastq.py'
+    split_fastq.py: '/extscratch/morinlab/software/lab_scripts/split_fastq/split_fastq.py'
+    cmd_maker : '/home/jgrewal/projects/lab_pipeline/pipeline-components/file_eater/component_seed/count_comparefiles.py'
+    file_remover : '/home/jgrewal/projects/lab_pipeline/pipeline-components/file_eater/component_seed/compare_deleteinput.py'
+__SHARED__:
+    input_ref: '/extscratch/morinlab/projects/MCL_realignment/reference/hg18_lexico.fasta'
+    output_ref_ix: '/extscratch/morinlab/reference/reference_37d5/human_g1k_v37_decoy.fasta'
+    use_cluster: True
+    interval_parallel: False
+    do_cleanup: 'True'
+__SAMPLES__: 
+  MCL_1809_normal:
+         input_bam: "/extscratch/morinlab/projects/MCL_meta_analysis/data/bam_alignments/zhang_cohort/Normal.1809.sorted.hg18.bam"
+  MCL_1184_normal:
+         input_bam: "/extscratch/morinlab/projects/MCL_meta_analysis/data/bam_alignments/zhang_cohort/Normal.1184.sorted.hg18.bam"
+  MCL_1184_tumour:
+         input_bam: "/extscratch/morinlab/projects/MCL_meta_analysis/data/bam_alignments/zhang_cohort/MCL.1184.sorted.hg18.bam"
+
+__TASK_SPLIT_BAM__: #STEP 1 - split input bam file into proper paired, and not proper paired
+    reserved: 
+        # do not change this section.
+        component_name: 'splitbam'
+        component_version: '2.0'
+        seed_version: 'v2.16'
+    run: 
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__","use_cluster")
+        memory: '5G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars: 
+        boilerplate: 
+    component:
+        input_files:
+            input_file: ("__SAMPLES__","input_bam")
+        output_files:
+            output_dir: './'
+            output_file2: '$sample_id.unpaired.bam'
+            output_file1: '$sample_id.paired.bam' 
+        parameters: 
+            samflag: '2'
+__TASK_COMPARE_INBAM_SPLITBAM__: #STEP 4 post realignment. Compare input bam reads to realigned output bam.
+    reserved:
+        # do not change this section.
+        component_name: 'file_eater'
+        component_version: '1.5.0'
+        seed_version: '1.00.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__","use_cluster")
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ["__TASK_SPLIT_BAM__"]
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            out_files:
+                ("__TASK_SPLIT_BAM__","output_file1"),
+                ("__TASK_SPLIT_BAM__","output_file2"),
+            input_filenames:
+                ("__SAMPLES__","input_bam"),
+        output_files:
+        parameters:
+            out_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+            in_dir: '/'
+            filetype_in: 'bam'
+            filetype_out: 'bam'
+            delete_input: 'False'
+__TASK_FILTER_UNPAIRED_BAM__: #STEP 2 - split STEP 1's improper pair set into paired and singletons
+    reserved:
+        # do not change this section.
+        component_name: 'filter_bam'
+        component_version: '1.0.0'
+        seed_version: '1.1'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__","use_cluster")
+        memory: '6G'
+        num_cpus: 1 
+        forced_dependencies: ["__TASK_SPLIT_BAM__","__TASK_COMPARE_INBAM_SPLITBAM__"]
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            input_bam: ("__TASK_SPLIT_BAM__","output_file2")
+        output_files:
+            output_paired: '$sample_id.unmapped.paired.bam'
+            output_readnames: 'unmapped_paired_reads.txt'
+            output_unpaired: '$sample_id.unpairedreads.bam'
+        parameters:
+            verbosity: 'INFO'
+            quiet: 'false'
+            val_stringency: 'LENIENT'
+            sort_order: 'coordinate' #In the interest of saving time. Can be coordinate, queryname, unsorted
+            delete_input: 'false'
+__TASK_CLEANUP_FILTER_UNPAIRED__: # STEP 2's CLEANUP TASK
+    reserved:
+        # do not change this section.
+        component_name: 'file_eater'
+        component_version: '1.5.0'
+        seed_version: '1.00.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__","use_cluster")
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ["__TASK_FILTER_UNPAIRED_BAM__"]
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            out_files:
+                 ("__TASK_FILTER_UNPAIRED_BAM__","output_paired"),
+                 ("__TASK_FILTER_UNPAIRED_BAM__","output_unpaired")
+            input_filenames:
+                 ("__TASK_SPLIT_BAM__","output_file2"),
+        output_files:
+        parameters:
+            out_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+            in_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+            filetype_in: 'bam'
+            filetype_out: 'bam'
+            delete_input: ("__SHARED__","do_cleanup")
+__TASK_MERGE_PAIRED_BAM__: #STEP 3 (paired reads) - merge paired sets from STEP1 and STEP2
+    reserved:  
+        # do not change this section.
+        component_name: 'picard_mergesam'
+        component_version: '1.0.0'
+        seed_version: '1.119'
+    run: 
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__","use_cluster")
+        memory: '10G'
+        num_cpus: 1
+        forced_dependencies: ["__TASK_FILTER_UNPAIRED_BAM__","__TASK_CLEANUP_FILTER_UNPAIRED__","__TASK_COMPARE_INBAM_SPLITBAM__"]
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+             input_dir: '$pipeline_working_dir/$pipeline_name/outputs'
+        output_files:
+            output_file: '$sample_id.pairedreads.bam'
+        parameters:
+            verbosity: 'INFO'
+            quiet: 'false'
+            val_stringency: 'LENIENT'
+            use_threading: 'true'
+            sort_order: 'coordinate' #In the interest of saving time. Can be coordinate, queryname, unsorted
+            input_regex: '*.paired.bam'
+            delete_input: 'false'
+__TASK_CLEANUP_MERGE_PAIRED__: #STEP 3 (paired reads) 's CLEANUP TASK
+    reserved:
+        # do not change this section.
+        component_name: 'file_eater'
+        component_version: '1.5.0'
+        seed_version: '1.00.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__","use_cluster")
+        memory: '1G' 
+        num_cpus: 1
+        forced_dependencies: ["__TASK_MERGE_PAIRED_BAM__","__TASK_COMPARE_INBAM_SPLITBAM__","__TASK_CLEANUP_FILTER_UNPAIRED__"]
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            out_files:
+                 ("__TASK_MERGE_PAIRED_BAM__","output_file")
+            input_filenames:
+                 ("__TASK_SPLIT_BAM__","output_file1"),
+                 ("__TASK_FILTER_UNPAIRED_BAM__","output_paired")
+        output_files:
+        parameters:
+            out_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+            in_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+            filetype_in: 'bam'
+            filetype_out: 'bam'
+            delete_input: ("__SHARED__","do_cleanup")
+__TASK_BAM_PAIRED_TO_FASTQ__: #STEP 4 (paired reads) - convert the set of paired reads bam to 2 fastq files.
+    reserved: 
+        # do not change this section.
+        component_name: 'picard_samtofastq'
+        component_version: 'v3.0'
+        seed_version: 'version 1.119'
+    run: 
+        use_cluster: ("__SHARED__","use_cluster")
+        memory: '8G'
+        num_cpus: 1
+        forced_dependencies: ["__TASK_MERGE_PAIRED_BAM__","__TASK_CLEANUP_MERGE_PAIRED__"]
+        add_breakpoint: False
+        env_vars: 
+        boilerplate: 
+        parallel_run: False
+        parallel_params: []
+        interval_file: 
+    component: 
+        input_files: 
+            input_bam: ("__TASK_MERGE_PAIRED_BAM__","output_file")
+        output_files: 
+            outfile2: '$sample_id.R2.fastq'
+            outfile1: '$sample_id.R1.fastq'
+            output_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+            log_file: 'samToFastq_run.log'
+        parameters: 
+            include_nonprimary: 'false'
+            clipping_attribute: 'null'
+            tmp_dir: 'null'
+            verbosity: 'INFO'
+            javamem: '4G'
+            quiet: 'false'
+            output_per_rg: 'false'
+            read2_trim: '0'
+            val_stringency: 'LENIENT'
+            interleave: 'false'
+            rg_tag: 'PU'
+            clipping_action: 'null'
+            read1_trim: '0'
+            include_non_pf_reads: 'false'
+            rereverse_bases: 'false'
+            read1_maxbases: 'null'
+            read2_maxbases: 'null'
+__TASK_CLEANUP_BAM_PAIRED_TO_FASTQ__: #STEP 4 (paired reads) 's CLEANUP TASK
+    reserved:
+        # do not change this section.
+        component_name: 'file_eater'
+        component_version: '1.5.0'
+        seed_version: '1.00.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__","use_cluster")
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ["__TASK_BAM_PAIRED_TO_FASTQ__"]
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            out_files:
+                 ("__TASK_BAM_PAIRED_TO_FASTQ__","outfile1"),
+                 ("__TASK_BAM_PAIRED_TO_FASTQ__","outfile2")
+            input_filenames:
+                 ("__TASK_MERGE_PAIRED_BAM__","output_file"),
+        output_files:
+        parameters:
+            out_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+            in_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+            filetype_in: 'bam'
+            filetype_out: 'fastq'
+            delete_input: ("__SHARED__","do_cleanup")
+__TASK_BAM_UNPAIRED_TO_FASTQ__: #STEP 3 (unpaired reads) - convert the set of unpaired reads bam to a single fastq file.
+    reserved:
+        # do not change this section.
+        component_name: 'bedtools_bamtofastq'
+        component_version: '1.00.0'
+        seed_version: '2.17.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__","use_cluster")
+        memory: '5G'
+        num_cpus: 1
+        forced_dependencies: ["__TASK_FILTER_UNPAIRED_BAM__","__TASK_CLEANUP_FILTER_UNPAIRED__"]
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component: 
+        input_files: 
+            input_bam: ("__TASK_FILTER_UNPAIRED_BAM__","output_unpaired")
+        output_files: 
+            output_fastq: '$sample_id.unpairedreads.fastq'
+        parameters:
+__TASK_CLEANUP_BAM_UNPAIRED_TO_FASTQ__: #STEP 3 (unpaired reads) 's CLEANUP TASK
+    reserved:
+        # do not change this section.
+        component_name: 'file_eater'
+        component_version: '1.5.0'
+        seed_version: '1.00.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__","use_cluster")
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ["__TASK_BAM_UNPAIRED_TO_FASTQ__"]
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            out_files:
+                 ("__TASK_BAM_UNPAIRED_TO_FASTQ__","output_fastq"),
+            input_filenames:
+                 ("__TASK_FILTER_UNPAIRED_BAM__","output_unpaired"),
+        output_files:
+        parameters:
+            out_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+            in_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+            filetype_in: 'bam'
+            filetype_out: 'fastq'
+            delete_input: ("__SHARED__","do_cleanup")
+__TASK_BWAMEM_PAIRED__: #STEP 6 (paired reads) - Align using the split fastqs 
+    reserved:
+        # do not change this section.
+        component_name: 'bwa_mem'
+        component_version: 'v1.0.0'
+        seed_version: 'v0.7.10'
+    run:
+        use_cluster: ("__SHARED__","use_cluster")
+        memory: '10G'
+        num_cpus: 1
+        forced_dependencies: ["__TASK_BAM_PAIRED_TO_FASTQ__","__TASK_CLEANUP_BAM_PAIRED_TO_FASTQ__"]
+        add_breakpoint: ("__SHARED__","interval_parallel")
+        env_vars:
+        boilerplate:
+        parallel_run: ("__SHARED__","interval_parallel")
+        parallel_params: []
+        interval_file: ("__SAMPLES__","interval_pairedfq")
+    component:
+        input_files:
+            fastq_1: ("__TASK_BAM_PAIRED_TO_FASTQ__","outfile1")
+            input_dir:
+            fastq_2: ("__TASK_BAM_PAIRED_TO_FASTQ__","outfile2")
+            reference: ("__SHARED__","output_ref_ix")
+        output_files:
+            output_bam: 'realigned_bam/bam_paired_realn.bam'
+            output_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+        parameters:
+            num_threads: '__OPTIONAL__'
+__TASK_CLEANUP_BWAMEM_PAIRED__: #STEP 6 (paired reads) 's CLEANUP TASK
+    reserved:
+        # do not change this section.
+        component_name: 'file_eater'
+        component_version: '1.5.0'
+        seed_version: '1.00.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__","use_cluster")
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ["__TASK_BWAMEM_PAIRED__"]
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            out_files:
+                 ("__TASK_BWAMEM_PAIRED__","output_bam"),
+            input_filenames:
+                 ("__TASK_BAM_PAIRED_TO_FASTQ__","outfile1"),
+                 ("__TASK_BAM_PAIRED_TO_FASTQ__","outfile2"),
+        output_files:
+        parameters:
+            out_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+            in_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+            filetype_in: 'fastq'
+            filetype_out: 'bam'
+            delete_input: ("__SHARED__","do_cleanup")
+__TASK_BWAMEM_UNPAIRED__: #STEP 5 (unpaired reads) - Align using the split fastqs 
+    reserved:
+        # do not change this section.
+        component_name: 'bwa_mem'
+        component_version: 'v1.0.0'
+        seed_version: 'v0.7.10'
+    run:
+        use_cluster: ("__SHARED__","use_cluster")
+        memory: '10G'
+        num_cpus: 1
+        forced_dependencies: ["__TASK_BAM_UNPAIRED_TO_FASTQ__","__TASK_CLEANUP_BAM_UNPAIRED_TO_FASTQ__"]
+        add_breakpoint: ("__SHARED__","interval_parallel")
+        env_vars:
+        boilerplate:
+        parallel_run: ("__SHARED__","interval_parallel")
+        parallel_params: []
+        interval_file: ("__SAMPLES__","interval_unpairedfq")
+    component:
+        input_files:
+            fastq_1: ("__TASK_BAM_UNPAIRED_TO_FASTQ__","output_fastq")
+            input_dir: 
+            fastq_2: 
+            reference: ("__SHARED__","output_ref_ix")
+        output_files:
+            output_bam: 'realigned_bam/bam_unpaired_realn.bam'
+            output_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+        parameters:
+            num_threads: '__OPTIONAL__'
+__TASK_CLEANUP_BWAMEM_UNPAIRED__: #STEP 5 (unpaired reads) 's CLEANUP TASK
+    reserved:
+        # do not change this section.
+        component_name: 'file_eater'
+        component_version: '1.5.0'
+        seed_version: '1.00.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__","use_cluster")
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ["__TASK_BWAMEM_UNPAIRED__"]
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            out_files:
+                 ("__TASK_BWAMEM_UNPAIRED__","output_bam"),
+            input_filenames:
+                 ("__TASK_BAM_UNPAIRED_TO_FASTQ__","output_fastq")
+        output_files:
+        parameters:
+            out_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+            in_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+            filetype_in: 'fastq'
+            filetype_out: 'bam'
+            delete_input: ("__SHARED__","do_cleanup")
+__TASK_MERGE_SORT_REALND__: #STEP 1 post realignment (merge outputs, STEP 5 (unpaired) and STEP 6 (paired))
+    reserved:  
+        # do not change this section.
+        component_name: 'picard_mergesam'
+        component_version: '1.0.0'
+        seed_version: '1.119'
+    run: 
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__","use_cluster")
+        memory: '10G'
+        num_cpus: 1
+        forced_dependencies: ["__TASK_BWAMEM_PAIRED__", "__TASK_BWAMEM_UNPAIRED__","__TASK_CLEANUP_BWAMEM_UNPAIRED__","__TASK_CLEANUP_BWAMEM_PAIRED__"]
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+             input_dir: '$pipeline_working_dir/$pipeline_name/outputs/realigned_bam/'
+        output_files:
+            output_file: 'realigned_bam/$sample_id.realigned.bam'
+        parameters:
+            verbosity: 'INFO'
+            quiet: 'false'
+            val_stringency: 'LENIENT'
+            use_threading: 'true'
+            sort_order: 'coordinate'
+            input_regex: '*_realn.bam'
+            delete_input: 'false'
+__TASK_CLEANUP_MERGE_SORT_REALND__: #STEP 1 post realignment 's CLEANUP TASK
+    reserved:
+        # do not change this section.
+        component_name: 'file_eater'
+        component_version: '1.5.0'
+        seed_version: '1.00.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__","use_cluster")
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ["__TASK_MERGE_SORT_REALND__"]
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            out_files:
+                 ("__TASK_MERGE_SORT_REALND__","output_file"),
+            input_filenames:
+                 "*_realn.bam"
+        output_files:
+        parameters:
+            out_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+            in_dir: ("__TASK_MERGE_SORT_REALND__","input_dir")
+            filetype_in: 'bam'
+            filetype_out: 'bam'
+            delete_input: ("__SHARED__","do_cleanup")
+__TASK_MARKDUP_REALND__: #STEP 2 post realignment (markup merged bam)
+    reserved:
+        # do not change this section.
+        component_name: 'picard_markdup'
+        component_version: '1.0.0'
+        seed_version: '1.119'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__","use_cluster")
+        memory: '5G'
+        num_cpus: 1
+        forced_dependencies: ["__TASK_MERGE_SORT_REALND__","__TASK_CLEANUP_MERGE_SORT_REALND__"]
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            input_file: ("__TASK_MERGE_SORT_REALND__","output_file")
+        output_files:
+            output_file: 'realigned_bam/$sample_id.markdup.realigned.bam'
+        parameters:
+            verbosity: 'INFO'
+            quiet: 'false'
+            val_stringency: 'LENIENT'
+            metrics_file: 'realigned_bam/$sample_id.markdup.realigned.metrics'
+__TASK_CLEANUP_MARKDUP_REALND__: #STEP 2 post realignment CLEANUP TASK
+    reserved:
+        # do not change this section.
+        component_name: 'file_eater'
+        component_version: '1.5.0'
+        seed_version: '1.00.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__","use_cluster")
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ["__TASK_MARKDUP_REALND__"]
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            out_files:
+                 ("__TASK_MARKDUP_REALND__","output_file"),
+            input_filenames:
+                 ("__TASK_MERGE_SORT_REALND__","output_file"),
+        output_files:
+        parameters:
+            out_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+            in_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+            filetype_in: 'bam'
+            filetype_out: 'bam'
+            delete_input: ("__SHARED__","do_cleanup")
+__TASK_CLIPOVERLAP_REALND__: #STEP 3 post realignment (clip overlap bam)
+    reserved:
+        # do not change this section.
+        component_name: 'clipoverlap'
+        component_version: '1.0.0'
+        seed_version: '2.16'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__","use_cluster")
+        memory: '3G'
+        num_cpus: 2
+        forced_dependencies: ["__TASK_MARKDUP_REALND__"]
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            input_file: ("__TASK_MARKDUP_REALND__","output_file")
+        output_files:
+            output_file: 'realigned_bam/$sample_id.clipped.markdup.realigned.bam'
+        parameters:
+__TASK_CLEANUP_CLIPOVERLAP_REALND__: #STEP 3 post realignment CLEANUP TASK
+    reserved:
+        # do not change this section.
+        component_name: 'file_eater'
+        component_version: '1.5.0'
+        seed_version: '1.00.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__","use_cluster")
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ["__TASK_CLIPOVERLAP_REALND__"]
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            out_files:
+                ("__TASK_CLIPOVERLAP_REALND__","output_file"),
+            input_filenames:
+                ("__TASK_MARKDUP_REALND__","output_file"),
+        output_files:
+        parameters:
+            out_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+            in_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+            filetype_in: 'bam'
+            filetype_out: 'bam'
+            delete_input: ("__SHARED__","do_cleanup")
+__TASK_COMPARE_INBAM_OUTBAM__: #STEP 4 post realignment. Compare input bam reads to realigned output bam.
+    reserved:
+        # do not change this section.
+        component_name: 'file_eater'
+        component_version: '1.5.0'
+        seed_version: '1.00.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__","use_cluster")
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ["__TASK_CLIPOVERLAP_REALND__"]
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            out_files:
+                ("__TASK_CLIPOVERLAP_REALND__","output_file"),
+            input_filenames:
+                ("__SAMPLES__","input_bam"),
+        output_files:
+        parameters:
+            out_dir: '$pipeline_working_dir/$pipeline_name/outputs/'
+            in_dir: '/'
+            filetype_in: 'bam'
+            filetype_out: 'bam'
+            delete_input: 'False'
