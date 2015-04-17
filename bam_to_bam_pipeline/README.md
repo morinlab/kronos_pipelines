@@ -28,6 +28,11 @@ Output stats : All checksums for I/O of each task are output to
 
 - No new updates
 
+### Description of scripts
+cluster_ZHANG_EXOMES_bam_to_bam_interval.yaml - Full pipeline with split_fastq and dependent cleanup tasks. Interval based parallelization of bam alignment step.
+cluster_ZHANG_EXOMES_bam_to_bam_nointerval.yaml - Full pipeline without split_fastq. No interval based parallelization
+run.py - Script used while running the pipeline with the interval option. Do not run the pipeline independentely.
+
 ### Running the pipeline
 ```
 Please prepare a draft of your .yaml with the samples listed.
