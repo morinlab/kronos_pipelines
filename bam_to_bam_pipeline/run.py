@@ -81,9 +81,9 @@ def generate_interval_files(sample_ids, run_id, pipeline_name):
                         intfile_writer.write(str(i)+'\n')
 
 
-def init_pipeline(pipeline_name):
+def init_pipeline(pipeline_name,conf_file):
 	cmd = [sys.executable, os.path.join(os.path.dirname(pipeline_factory.__file__),'factory.py') , '--working_dir', args.outdir,
-	       'init_pipeline', '-c', args.config, '-p', pipeline_name]
+	       'init_pipeline', '-c', conf_file, '-p', pipeline_name]
 	cmd = ' '.join(cmd)
 	print 'MY INIT CMD: ' +cmd
 	run(cmd)
@@ -124,11 +124,18 @@ def update_yaml(pipeline_name, run_id):
 	yaml_dict["__SAMPLES__"][mysample]["interval_pairedfq"]= os.path.join(interval_filepath, 'TASK_SPLIT_PAIRED_FASTQ_split_fq_paired_interval.txt')
 	yaml_dict["__SAMPLES__"][mysample]["interval_unpairedfq"]= os.path.join(interval_filepath, 'TASK_SPLIT_UNPAIRED_FASTQ_split_fq_unpaired_interval.txt')
 
-    with open(args.config,"w") as f:
-	yaml.dump(yaml_dict,f)
+    #with open(args.config,"w") as f:
+#	yaml.dump(yaml_dict,f)
 
-    yaml_dict = yaml.load(open(args.config))
-    template = open(args.config)
+#    yaml_dict = yaml.load(open(args.config))
+#    template = open(args.config)
+
+    with open(updated_yaml_name,"w") as f:
+        yaml.dump(yaml_dict,f)
+
+    yaml_dict = yaml.load(open(updated_yaml_name))
+    template = open(updated_yaml_name)
+
     output = []
 
     myenv_ids = ["$run_id","$sample_id"]
@@ -143,24 +150,24 @@ def update_yaml(pipeline_name, run_id):
         				 RUN_ID=run_id)
 	output.append(line)
 
-    outfile_stream = open(args.config,'w')
+    #outfile_stream = open(args.config,'w')
+    outfile_stream = open(updated_yaml_name,'w')
     for line in output:
         outfile_stream.write(line)
     outfile_stream.close()
 
 
 pipeline_name = os.path.basename(args.config).replace('.yaml','')
+updated_yaml_name = args.config.replace('.yaml','')+ "_updated.yaml"
+print "New yaml file is at : " + updated_yaml_name
 sample_ids = load_yaml()
 run_id = generate_run_id()
 generate_interval_files(sample_ids, run_id, pipeline_name)
 update_yaml(pipeline_name,run_id)
-init_pipeline(pipeline_name)
+init_pipeline(pipeline_name,updated_yaml_name) #init_pipeline(pipeline_name,args.config)
 run_pipeline(pipeline_name, run_id)
 
 #if the pipeline finishes without error (no exception) then the interval file will be populated, so rerun
-init_pipeline(pipeline_name)
+init_pipeline(pipeline_name, updated_yaml_name)
 run_pipeline(pipeline_name, run_id)
 
-#if the pipeline finishes without error (no exception) then the interval file will be populated, so rerun
-init_pipeline(pipeline_name)
-run_pipeline(pipeline_name, run_id)
