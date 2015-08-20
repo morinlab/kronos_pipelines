@@ -6,7 +6,7 @@ Development Information
 
 Date Created : Mar 31 2015
 Last Update  : Jul 15 2015
-Developer    : Jasleen Grewal (grewalj23@sfu.ca)
+Developer    : Jasleen Grewal (grewalj23@gmail.com)
 Input Params : pipeline structure file (YAML FORMAT)
 Output       : out_dir/outputs/realigned_bam/TASK_CLIPOVERLAP_REALND_SAMPLE_ID.clipped.markdup.realigned.bam
 Output stats : All checksums for I/O of each task are output to 
