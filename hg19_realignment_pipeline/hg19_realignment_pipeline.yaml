@@ -1,0 +1,112 @@
+__PIPELINE_INFO__:
+    name: 'hg19_realignment_pipeline' 
+    version: 'v1.0.0'
+    author: 'ppararaj <ppararaj@sfu.ca>'
+    data_type: null
+    input_type: 'bam'
+    output_type: 'fastq'
+    host_cluster: 'genesis'
+    date_created: '28 October 2015'
+    date_last_updated: '28 October 2015'
+    factory_version: '1.12.0'
+__GENERAL__:
+    python: '/path/to/python'
+    samtools: '/path/to/samtools'
+    bamhash_checksum_bam: '/path/to/bamhash_checksum_bam'
+    bwa: '/path/to/bwa'
+__SHARED__:
+    input_ref: '/path/to/hg19_indexed_reference'
+    use_cluster: True
+    interval_parallel: True
+__SAMPLES__:
+    # Multiple BAMs organized by sample_id
+	#sample_id:
+	#    input_bam:value1
+__BAMHASH_CHECKSUM_BAM__: 
+    reserved: 
+        # do not change this section.
+        component_name: 'bamhash_checksum_bam'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.1'
+    run: 
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars: 
+        boilerplate: 
+    component: 
+        input_files: 
+            in_bams: ("__SAMPLES__", "input_bam")
+        output_files: 
+            out_checksum: '/path/to/checksum_output'
+__BAM2FQ__: 
+    reserved: 
+        # do not change this section.
+        component_name: 'bam2fq'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0.0'
+    run: 
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '6G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars: 
+        boilerplate: 
+    component: 
+        input_files: 
+            bam: ('__SAMPLES__', 'input_bam')
+        output_files: 
+            outdir: '__REQUIRED__'
+__BWA_MEM_PARALLELIZED__: 
+    reserved: 
+        # do not change this section.
+        component_name: 'bwa_mem_parallelized'
+        component_version: 'v1.0.0'
+        seed_version: 'v0.7.10'
+    run: 
+        use_cluster: False
+        memory: '6G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars: 
+        boilerplate: 
+        parallel_run: True
+        parallel_params: []
+        interval_file: '/path/to/interval.txt'
+    component: 
+        input_files: 
+            input_dir: '__REQUIRED__'
+            bwa_index_prefix: '__REQUIRED__'
+        output_files: 
+            output_dir: '__REQUIRED__'
+__SAMTOOLS_SORT__: 
+    reserved: 
+        # do not change this section.
+        component_name: 'samtools_sort'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.2'
+    run: 
+        use_cluster: False
+        memory: '6G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars: 
+        boilerplate: 
+    component: 
+        input_files: 
+            input_bam: '__REQUIRED__'
+        output_files: 
+            output_bam: '__REQUIRED__'
+        parameters: 
+                "l": "__OPTIONAL__"
+                "m": "__OPTIONAL__"
+                "n": "__FLAG__"
+                "o": "__OPTIONAL__"
+                "O": "__OPTIONAL__"
+                "T": "__OPTIONAL__"
+                "@": "__OPTIONAL__"
