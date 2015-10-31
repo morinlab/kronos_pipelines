@@ -8,7 +8,7 @@ __PIPELINE_INFO__:
     host_cluster: Genesis
     date_created: Oct 30 2015
     date_last_updated: Oct 30 2015
-    factory_version: '1.10.3'
+    factory_version: '1.11.0'
 __GENERAL__:
     samtools: '/extscratch/morinlab/software/samtools/1.2/bin/samtools'
 __SHARED__:
@@ -29,8 +29,6 @@ __TASK_1__:
         num_cpus: 1
         forced_dependencies: []
         add_breakpoint: False
-        env_vars:
-        boilerplate:
         parallel_run: True
         parallel_params: []
         interval_file: '/extscratch/morinlab/shared/prasath/MCL/exome/bams/interval.txt'
