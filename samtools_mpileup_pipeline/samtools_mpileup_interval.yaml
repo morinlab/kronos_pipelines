@@ -8,7 +8,7 @@ __PIPELINE_INFO__:
     host_cluster: Genesis
     date_created: Oct 30 2015
     date_last_updated: Oct 30 2015
-    factory_version: '1.12.0'
+    factory_version: '1.10.3'
 __GENERAL__:
     samtools: '/extscratch/morinlab/software/samtools/1.2/bin/samtools'
 __SHARED__:
@@ -40,4 +40,4 @@ __TASK_1__:
         output_files:
             output_file: ('__SAMPLES__', 'outdir')
         parameters:
-            "f":('__SHARED__', 'ref')
+            f:('__SHARED__', 'ref')
