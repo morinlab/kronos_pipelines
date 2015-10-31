@@ -1,0 +1,43 @@
+__PIPELINE_INFO__:
+    name: samtools_mpileup_interval
+    version: 1.0.0
+    author: Prasath Pararajalingam (ppararaj@sfu.ca)
+    data_type: null
+    input_type: BAM
+    output_type: pileup file
+    host_cluster: Genesis
+    date_created: Oct 30 2015
+    date_last_updated: Oct 30 2015
+    factory_version: '1.12.0'
+__GENERAL__:
+    samtools: '/extscratch/morinlab/software/samtools/1.2/bin/samtools'
+__SHARED__:
+    ref: '/extscratch/morinlab/shared/common/GRCh37-lite.fa'
+__SAMPLES__:
+    MCL-126N:
+        bam: '/extscratch/morinlab/shared/prasath/MCL/exome/bams/MCL-126N.bam'
+        outdir: '/extscratch/morinlab/shared/prasath/MCL/exome/pileup'
+__TASK_1__:
+    reserved:
+        # do not change this section.
+        component_name: 'samtools_mpileup'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.2'
+    run:
+        use_cluster: True
+        memory: '6G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+        parallel_run: True
+        parallel_params: []
+        interval_file: '/extscratch/morinlab/shared/prasath/MCL/exome/bams/interval.txt'
+    component:
+        input_files:
+            input_bam: ('__SAMPLES__', 'bam')
+        output_files:
+            output_file: ('__SAMPLES__', 'outdir')
+        parameters:
+            "f":('__SHARED__', 'ref')
