@@ -117,4 +117,4 @@ __TASK_5__:
         add_breakpoint: False
     component:
         input_files:
-            input_file: ('__TASK_3__', 'output_file')
+            input_file: ('__SAMPLES__', 'merged_pileup')
