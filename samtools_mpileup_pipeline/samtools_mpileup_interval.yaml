@@ -43,7 +43,7 @@ __TASK_1__:
         output_files:
             output_file: ('__SAMPLES__', 'outdir')
         parameters:
-            f:('__SHARED__', 'ref')
+            f: ('__SHARED__', 'ref')
 __TASK_2__:
     reserved:
         # do not change this section.
