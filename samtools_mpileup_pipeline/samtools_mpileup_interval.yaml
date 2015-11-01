@@ -20,9 +20,10 @@ __SHARED__:
     interval: '/extscratch/morinlab/shared/prasath/MCL/exome/bams/interval.txt'
 __SAMPLES__:
     MCL-126N:
-        bam: '/extscratch/morinlab/shared/prasath/MCL/exome/bams/MCL-126N.bam'
-        outdir: '/extscratch/morinlab/shared/prasath/MCL/exome/pileup/MCL-126N/'
-        merged_pileup: '/extscratch/morinlab/shared/prasath/MCL/exome/pileup/MCL-126/MCL-126N.pileup'
+        bam: '/extscratch/morinlab/shared/prasath/MCL/exome/bams/$sample_id.bam'
+        outdir: '/extscratch/morinlab/shared/prasath/MCL/exome/pileup/$sample_id/'
+        merged_pileup: '/extscratch/morinlab/shared/prasath/MCL/exome/pileup/MCL-126/$sample_id.pileup'
+        gzip_pileup: '/extscratch/morinlab/shared/prasath/MCL/exome/pileup/MCL-126/TASK_3_$sample_id.pileup'
 __TASK_1__: 
     reserved: 
         # do not change this section.
@@ -117,4 +118,4 @@ __TASK_5__:
         add_breakpoint: False
     component:
         input_files:
-            input_file: ('__SAMPLES__', 'merged_pileup')
+            input_file: ('__SAMPLES__', 'gzip_pileup')
