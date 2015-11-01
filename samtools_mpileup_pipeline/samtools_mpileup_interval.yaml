@@ -13,12 +13,15 @@ __GENERAL__:
     samtools: '/extscratch/morinlab/software/samtools/1.2/bin/samtools'
     python: '/extscratch/morinlab/software/anaconda/2.2.0/bin/python2.7'
     merge_mpileup: '/home/prasathp/repos/lab_scripts/merge_mpileup/merge_mpileup.py'
+    rm: 'rm'
 __SHARED__:
     ref: '/extscratch/morinlab/shared/common/GRCh37-lite.fa'
+    interval: '/extscratch/morinlab/shared/prasath/MCL/exome/bams/interval.txt'
 __SAMPLES__:
     MCL-126N:
-        bam: '/extscratch/morinlab/shared/prasath/MCL/exome/bams/MCL-126N.bam'
-        outdir: '/extscratch/morinlab/shared/prasath/MCL/exome/pileup/'
+        bam: '/extscratch/morinlab/shared/prasath/MCL/exome/bams/$sample_id.bam'
+        outdir: '/extscratch/morinlab/shared/prasath/MCL/exome/pileup/$sample_id/'
+        merged_pileup: '/extscratch/morinlab/shared/prasath/MCL/exome/pileup/MCL-126/$sample_id.pileup'
 __TASK_1__:
     reserved:
         # do not change this section.
@@ -33,7 +36,7 @@ __TASK_1__:
         add_breakpoint: False
         parallel_run: True
         parallel_params: []
-        interval_file: '/extscratch/morinlab/shared/prasath/MCL/exome/bams/interval.txt'
+        interval_file: ('__SHARED__', 'interval')
     component:
         input_files:
             input_bam: ('__SAMPLES__', 'bam')
@@ -42,3 +45,40 @@ __TASK_1__:
         parameters:
             f:('__SHARED__', 'ref')
 __TASK_2__:
+    reserved:
+        # do not change this section.
+        component_name: 'merge_mpileup'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: True
+        memory: '6G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_1__']
+        add_breakpoint: False
+    component:
+        input_files:
+            input_dir: ('__SAMPLES__', 'outdir')
+        output_files:
+            output_file: ('__SAMPLES__', 'merged_pileup')
+__TASK_3__: 
+    reserved: 
+        # do not change this section.
+        component_name: 'delete_files'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0.0'
+    run: 
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: False
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_2__']
+        add_breakpoint: False
+        env_vars: 
+        boilerplate: 
+    component: 
+        input_files: 
+            files: ('__SAMPLES__', 'outdir')
+        output_files: 
+        parameters: 
+            recursive: True
