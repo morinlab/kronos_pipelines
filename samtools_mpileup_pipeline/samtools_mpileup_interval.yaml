@@ -14,15 +14,36 @@ __GENERAL__:
     python: '/extscratch/morinlab/software/anaconda/2.2.0/bin/python2.7'
     merge_mpileup: '/home/prasathp/repos/lab_scripts/merge_mpileup/merge_mpileup.py'
     rm: 'rm'
+    gzip: 'gzip'
 __SHARED__:
     ref: '/extscratch/morinlab/shared/common/GRCh37-lite.fa'
     interval: '/extscratch/morinlab/shared/prasath/MCL/exome/bams/interval.txt'
 __SAMPLES__:
     MCL-126N:
-        bam: '/extscratch/morinlab/shared/prasath/MCL/exome/bams/$sample_id.bam'
-        outdir: '/extscratch/morinlab/shared/prasath/MCL/exome/pileup/$sample_id/'
-        merged_pileup: '/extscratch/morinlab/shared/prasath/MCL/exome/pileup/MCL-126/$sample_id.pileup'
-__TASK_1__:
+        bam: '/extscratch/morinlab/shared/prasath/MCL/exome/bams/MCL-126N.bam'
+        outdir: '/extscratch/morinlab/shared/prasath/MCL/exome/pileup/MCL-126N/'
+        merged_pileup: '/extscratch/morinlab/shared/prasath/MCL/exome/pileup/MCL-126/MCL-126N.pileup'
+__TASK_1__: 
+    reserved: 
+        # do not change this section.
+        component_name: 'samtools_index'
+        component_version: 'v1.0.0'
+        seed_version: 'v0.1.19'
+    run: 
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: False
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars: 
+        boilerplate: 
+    component: 
+        input_files: 
+            bam_file: ('__SAMPLES__', 'bam')
+        output_files: 
+        parameters: 
+__TASK_2__:
     reserved:
         # do not change this section.
         component_name: 'samtools_mpileup'
@@ -32,7 +53,7 @@ __TASK_1__:
         use_cluster: True
         memory: '6G'
         num_cpus: 1
-        forced_dependencies: []
+        forced_dependencies: ['__TASK_1__']
         add_breakpoint: False
         parallel_run: True
         parallel_params: []
@@ -44,7 +65,7 @@ __TASK_1__:
             output_file: ('__SAMPLES__', 'outdir')
         parameters:
             f: ('__SHARED__', 'ref')
-__TASK_2__:
+__TASK_3__:
     reserved:
         # do not change this section.
         component_name: 'merge_mpileup'
@@ -54,14 +75,14 @@ __TASK_2__:
         use_cluster: True
         memory: '6G'
         num_cpus: 1
-        forced_dependencies: ['__TASK_1__']
+        forced_dependencies: ['__TASK_2__']
         add_breakpoint: False
     component:
         input_files:
             input_dir: ('__SAMPLES__', 'outdir')
         output_files:
             output_file: ('__SAMPLES__', 'merged_pileup')
-__TASK_3__: 
+__TASK_4__: 
     reserved: 
         # do not change this section.
         component_name: 'delete_files'
@@ -72,7 +93,7 @@ __TASK_3__:
         use_cluster: False
         memory: '1G'
         num_cpus: 1
-        forced_dependencies: ['__TASK_2__']
+        forced_dependencies: ['__TASK_3__']
         add_breakpoint: False
         env_vars: 
         boilerplate: 
@@ -82,3 +103,18 @@ __TASK_3__:
         output_files: 
         parameters: 
             recursive: True
+__TASK_5__:
+    reserved:
+        # do not change this section.
+        component_name: 'gzip'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.6'
+    run:
+        use_cluster: True
+        memory: '6G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_3__']
+        add_breakpoint: False
+    component:
+        input_files:
+            input_file: ('__TASK_3__', 'output_file')
