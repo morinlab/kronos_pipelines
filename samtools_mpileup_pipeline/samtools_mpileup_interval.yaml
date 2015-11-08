@@ -117,7 +117,7 @@ __TASK_1__:
         seed_version: 'v0.1.19'
     run: 
         # NOTE: component cannot run in parallel mode.
-        use_cluster: False
+        use_cluster: True
         memory: '1G'
         num_cpus: 1
         forced_dependencies: []
