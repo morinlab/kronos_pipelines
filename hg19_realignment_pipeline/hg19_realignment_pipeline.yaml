@@ -8,29 +8,33 @@ __PIPELINE_INFO__:
     host_cluster: 'genesis'
     date_created: '28 October 2015'
     date_last_updated: '28 October 2015'
-    factory_version: '1.12.0'
+    factory_version: '1.11.0'
 __GENERAL__:
-    python: '/path/to/python'
-    samtools: '/path/to/samtools'
-    bamhash_checksum_bam: '/path/to/bamhash_checksum_bam'
-    bwa: '/path/to/bwa'
+    python: '/extscratch/morinlab/software/anaconda/2.2.0/bin/python2.7'
+    samtools: '/extscratch/morinlab/software/samtools/1.2/bin/samtools'
+    bamhash_checksum_bam: '/extscratch/morinlab/software/bamhash/1.0/bin/bamhash_checksum_bam'
+    bwa: '/extscratch/morinlab/software/bwa/0.7.12/bwa'
+    bam2fq: '/home/prasathp/repos/lab_scripts/bam2fq/bam2fq.py'
 __SHARED__:
-    input_ref: '/path/to/hg19_indexed_reference'
-    use_cluster: True
-    interval_parallel: True
+    input_ref: '/extscratch/morinlab/shared/prasath/common/homo_sapiens.hg19.chr.fa'
 __SAMPLES__:
-    # Multiple BAMs organized by sample_id
-	#sample_id:
-	#    input_bam:value1
-__BAMHASH_CHECKSUM_BAM__: 
+    MCL-98N:
+        input_bam: '/extscratch/morinlab/shared/prasath/MCL/exome/bams/$sample_id.bam'
+        interval_file: '/extscratch/morinlab/shared/prasath/MCL/realigned/MCL-98N/temp_dir/interval.txt'
+        original_checksum: '/extscratch/morinlab/shared/prasath/MCL/exome/realigned/$sample_id/$sample_id_original.md5'
+        new_checksum: '/extscratch/morinlab/shared/prasath/MCL/exome/realigned/$sample_id/$sample_id_new.md5'
+        outdir: '/extscratch/morinlab/shared/prasath/MCL/exome/realigned/$sample_id/temp_dir/'
+        out_bam: '/extscratch/morinlab/shared/prasath/MCL/exome/realigned/$sample_id.bam'
+        out_bam_file: '/extscratch/morinlab/shared/prasath/MCL/exome/realigned/TASK_5_$sample_id.bam'
+__TASK_1__: 
     reserved: 
         # do not change this section.
         component_name: 'bamhash_checksum_bam'
         component_version: 'v1.0.0'
-        seed_version: 'v1.1'
+        seed_version: 'v1.0'
     run: 
-        use_cluster: ("__SHARED__", "use_cluster")
-        memory: '1G'
+        use_cluster: True
+        memory: '5G'
         num_cpus: 1
         forced_dependencies: []
         add_breakpoint: False
@@ -40,73 +44,115 @@ __BAMHASH_CHECKSUM_BAM__:
         input_files: 
             in_bams: ("__SAMPLES__", "input_bam")
         output_files: 
-            out_checksum: '/path/to/checksum_output'
-__BAM2FQ__: 
+            out_checksum: ("__SAMPLES__", "original_checksum")
+__TASK_2__:
+    reserved:
+        component_name: 'bam2fq'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: True
+        memory: '5G'
+        num_cpus: 2
+        forced_dependencies: ['__TASK_1__']
+        add_breakpoint: False
+    component:
+        input_files:
+            input_bam: ("__SAMPLES__", "input_bam")
+        output_files:
+            outdir: ("__SAMPLES__", "outdir")
+__TASK_3__:
+    reserved:
+        component_name: 'bwa_mem_parallelized'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: True
+        memory: '6G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_2__']
+        add_breakpoint: False
+        parallel_run: True
+        parallel_params: []
+        interval_file: ('__SAMPLES__', 'interval_file')
+    component:
+        input_files:
+            input_dir: ('__SAMPLES__', 'outdir')
+            bwa_index_prefix: ('__SHARED__', 'input_ref')
+        output_files:
+            output_dir: ('__SAMPLES__', 'outdir')
+__TASK_4__:
+    reserved:
+        component_name: 'samtools_sort_parallelized'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: True
+        memory: '6G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_3__']
+        add_breakpoint: False
+        parallel_run: True
+        parallel_params: []
+        interval_file: ('__SAMPLES__', 'interval_file')
+    component:
+        input_files:
+            input_dir: ('__SAMPLES__', 'outdir')
+        output_files:
+            output_dir: ('__SAMPLES__', 'outdir')
+__TASK_5__:
+    reserved:
+        component_name: 'samtools_merge'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: True
+        memory: '6G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_4__']
+        add_breakpoint: False
+    component:
+        input_files:
+            input_dir: ('__SAMPLES__', 'outdir')
+        output_files:
+            output_file: ('__SAMPLES__', 'out_bam')
+__TASK_6__: 
     reserved: 
         # do not change this section.
-        component_name: 'bam2fq'
+        component_name: 'delete_files'
         component_version: 'v1.0.0'
         seed_version: 'v1.0.0'
     run: 
-        use_cluster: ("__SHARED__", "use_cluster")
-        memory: '6G'
-        num_cpus: 1
-        forced_dependencies: []
-        add_breakpoint: False
-        env_vars: 
-        boilerplate: 
-    component: 
-        input_files: 
-            bam: ('__SAMPLES__', 'input_bam')
-        output_files: 
-            outdir: '__REQUIRED__'
-__BWA_MEM_PARALLELIZED__: 
-    reserved: 
-        # do not change this section.
-        component_name: 'bwa_mem_parallelized'
-        component_version: 'v1.0.0'
-        seed_version: 'v0.7.10'
-    run: 
+        # NOTE: component cannot run in parallel mode.
         use_cluster: False
-        memory: '6G'
+        memory: '1G'
         num_cpus: 1
-        forced_dependencies: []
-        add_breakpoint: False
-        env_vars: 
-        boilerplate: 
-        parallel_run: True
-        parallel_params: []
-        interval_file: '/path/to/interval.txt'
-    component: 
-        input_files: 
-            input_dir: '__REQUIRED__'
-            bwa_index_prefix: '__REQUIRED__'
-        output_files: 
-            output_dir: '__REQUIRED__'
-__SAMTOOLS_SORT__: 
-    reserved: 
-        # do not change this section.
-        component_name: 'samtools_sort'
-        component_version: 'v1.0.0'
-        seed_version: 'v1.2'
-    run: 
-        use_cluster: False
-        memory: '6G'
-        num_cpus: 1
-        forced_dependencies: []
+        forced_dependencies: ['__TASK_5__']
         add_breakpoint: False
         env_vars: 
         boilerplate: 
     component: 
         input_files: 
-            input_bam: '__REQUIRED__'
+            files: ('__SAMPLES__', 'outdir')
         output_files: 
-            output_bam: '__REQUIRED__'
         parameters: 
-                "l": "__OPTIONAL__"
-                "m": "__OPTIONAL__"
-                "n": "__FLAG__"
-                "o": "__OPTIONAL__"
-                "O": "__OPTIONAL__"
-                "T": "__OPTIONAL__"
-                "@": "__OPTIONAL__"
+            recursive: True
+__TASK_7__:
+    reserved:
+        # do not change this section.
+        component_name: 'bamhash_checksum_bam'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: True
+        memory: '5G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_5__']
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            in_bams: ("__SAMPLES__", "out_bam_file")
+        output_files:
+            out_checksum: ("__SAMPLES__", "new_checksum")
