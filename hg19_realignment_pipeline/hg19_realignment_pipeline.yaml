@@ -3,9 +3,9 @@ __PIPELINE_INFO__:
     version: 'v1.0.0'
     author: 'ppararaj <ppararaj@sfu.ca>'
     data_type: null
-    input_type: 'bam'
-    output_type: 'fastq'
-    host_cluster: 'genesis'
+    input_type: null
+    output_type: null
+    host_cluster: null
     date_created: '28 October 2015'
     date_last_updated: '28 October 2015'
     factory_version: '1.11.0'
@@ -18,14 +18,14 @@ __GENERAL__:
 __SHARED__:
     input_ref: '/extscratch/morinlab/shared/prasath/common/homo_sapiens.hg19.chr.fa'
 __SAMPLES__:
-    MCL-98N:
-        input_bam: '/extscratch/morinlab/shared/prasath/MCL/exome/bams/$sample_id.bam'
-        interval_file: '/extscratch/morinlab/shared/prasath/MCL/realigned/MCL-98N/temp_dir/interval.txt'
-        original_checksum: '/extscratch/morinlab/shared/prasath/MCL/exome/realigned/$sample_id/$sample_id_original.md5'
-        new_checksum: '/extscratch/morinlab/shared/prasath/MCL/exome/realigned/$sample_id/$sample_id_new.md5'
-        outdir: '/extscratch/morinlab/shared/prasath/MCL/exome/realigned/$sample_id/temp_dir/'
-        out_bam: '/extscratch/morinlab/shared/prasath/MCL/exome/realigned/$sample_id.bam'
-        out_bam_file: '/extscratch/morinlab/shared/prasath/MCL/exome/realigned/TASK_5_$sample_id.bam'
+    MCL-35N:
+        interval_file: '/extscratch/morinlab/shared/prasath/MCL/exome/realignment/MCL-35N/interval.txt'
+        input_bam: '/extscratch/morinlab/shared/prasath/MCL/exome/bams/MCL-35N.bam'
+        original_checksum: '/extscratch/morinlab/shared/prasath/MCL/exome/realignment/$sample_id.original.md5'
+        new_checksum: '/extscratch/morinlab/shared/prasath/MCL/exome/realignment/$sample_id.new.md5'
+        outdir: '/extscratch/morinlab/shared/prasath/MCL/exome/realignment/$sample_id/'
+        out_bam: '/extscratch/morinlab/shared/prasath/MCL/exome/realignment/$sample_id.bam'
+        out_bam_file: '/extscratch/morinlab/shared/prasath/MCL/exome/realignment/TASK_5_$sample_id.bam'
 __TASK_1__: 
     reserved: 
         # do not change this section.
@@ -55,7 +55,7 @@ __TASK_2__:
         memory: '5G'
         num_cpus: 2
         forced_dependencies: ['__TASK_1__']
-        add_breakpoint: False
+        add_breakpoint: True
     component:
         input_files:
             input_bam: ("__SAMPLES__", "input_bam")
@@ -70,11 +70,11 @@ __TASK_3__:
         use_cluster: True
         memory: '6G'
         num_cpus: 1
-        forced_dependencies: ['__TASK_2__']
+        forced_dependencies: ['__TASK_1__', '__TASK_2__']
         add_breakpoint: False
         parallel_run: True
         parallel_params: []
-        interval_file: ('__SAMPLES__', 'interval_file')
+        interval_file: ('__SAMPLES__', 'interval_file') 
     component:
         input_files:
             input_dir: ('__SAMPLES__', 'outdir')
@@ -90,7 +90,7 @@ __TASK_4__:
         use_cluster: True
         memory: '6G'
         num_cpus: 1
-        forced_dependencies: ['__TASK_3__']
+        forced_dependencies: ['__TASK_1__', '__TASK_2__', '__TASK_3__']
         add_breakpoint: False
         parallel_run: True
         parallel_params: []
@@ -109,7 +109,7 @@ __TASK_5__:
         use_cluster: True
         memory: '6G'
         num_cpus: 1
-        forced_dependencies: ['__TASK_4__']
+        forced_dependencies: ['__TASK_1__', '__TASK_2__', '__TASK_3__', '__TASK_4__']
         add_breakpoint: False
     component:
         input_files:
@@ -127,7 +127,7 @@ __TASK_6__:
         use_cluster: False
         memory: '1G'
         num_cpus: 1
-        forced_dependencies: ['__TASK_5__']
+        forced_dependencies: ['__TASK_1__', '__TASK_2__', '__TASK_3__', '__TASK_4__', '__TASK_5__']
         add_breakpoint: False
         env_vars: 
         boilerplate: 
@@ -147,7 +147,7 @@ __TASK_7__:
         use_cluster: True
         memory: '5G'
         num_cpus: 1
-        forced_dependencies: ['__TASK_5__']
+        forced_dependencies: ['__TASK_1__', '__TASK_2__', '__TASK_3__', '__TASK_4__', '__TASK_5__']
         add_breakpoint: False
         env_vars:
         boilerplate:
