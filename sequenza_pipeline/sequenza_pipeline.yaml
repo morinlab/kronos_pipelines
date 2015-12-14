@@ -25,6 +25,7 @@ __SHARED__:
     seq_analyze: "$$LOHR_PROJECT_HOME/software/lab_scripts-5.0/generate_sequenza_output/sequenza_analysis.R"
     gc_ref: "$$LOHR_PROJECT_HOME/reference/GRCh37.gc50Base.txt.gz"
     setup_env: ". /projects/lohr_prj/env.sh"
+    chromosomes: "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X"
 
 
 __SAMPLES__:
@@ -64,7 +65,7 @@ __TASK_SEQUENZA_BAM2SEQZ__:
             'N': '__OPTIONAL__'
             compress_seqz: True
             qlimit: '__OPTIONAL__'
-            chromosome: '__OPTIONAL__'
+            chromosome: ("__SHARED__", "chromosomes")
 
 
 __TASK_SEQUENZA_SEQZBINNING__:
@@ -101,7 +102,7 @@ __TASK_SEQUENZA_ANALYSIS__:
     run:
         # NOTE: component cannot run in parallel mode.
         use_cluster: True
-        memory: '1G'
+        memory: '5G'
         num_cpus: 1
         forced_dependencies: []
         add_breakpoint: False
