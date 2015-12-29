@@ -100,7 +100,7 @@ __HASH_BAM2FQ_FASTQ__:
         input_files:
             hash_sum_infile: ('__SAMPLES__', 'hash_sum')
         output_files:
-            new_fastqs: '/projects/rmorin/projects/nhl_meta_analysis/results/realignment_pipeline/MCL_Morin_2015/$sample_id/*.fastq*'
+            new_fastqs: '<outdir>/*.fastq*'
 __BWA_MEM_PARALLELIZED__:
     reserved:
         component_name: 'bwa_mem_parallelized'
@@ -135,7 +135,7 @@ __HASH_BWA_MEM_BAMS__:
         input_files:
             hash_sum_infile: ('__SAMPLES__', 'hash_sum')
         output_files:
-            new_bams: '/projects/rmorin/projects/nhl_meta_analysis/results/realignment_pipeline/MCL_Morin_2015/$sample_id/*.unsorted.bam'
+            new_bams: '<outdir>/*.unsorted.bam'
 __REMOVE_FASTQS__:
     reserved:
         component_name: 'delete_files'
@@ -149,7 +149,7 @@ __REMOVE_FASTQS__:
         add_breakpoint: False
     component:
         input_files:
-            files: '/projects/rmorin/projects/nhl_meta_analysis/results/realignment_pipeline/MCL_Morin_2015/$sample_id/*.fastq*'
+            files: '<outdir>/*.fastq*'
 __SAMTOOLS_SORT__:
     reserved:
         component_name: 'samtools_sort_parallelized'
@@ -182,7 +182,7 @@ __REMOVE_UNSORTED_BAMS__:
         add_breakpoint: False
     component:
         input_files:
-            files: '/projects/rmorin/projects/nhl_meta_analysis/results/realignment_pipeline/MCL_Morin_2015/$sample_id/*.unsorted.bam'
+            files: '<outdir>/*.unsorted.bam'
 __SAMTOOLS_MERGE__:
     reserved:
         component_name: 'samtools_merge'
@@ -212,7 +212,7 @@ __REMOVE_SORTED_BAMS__:
         add_breakpoint: False
     component:
         input_files:
-            files: '/projects/rmorin/projects/nhl_meta_analysis/results/realignment_pipeline/MCL_Morin_2015/$sample_id/*.sorted.bam'
+            files: '<outdir>/*.sorted.bam'
 __ADD_REPLACE_READ_GROUPS__:
     reserved:
         component_name: 'picard_add_or_replace_read_groups'
