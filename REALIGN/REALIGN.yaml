@@ -1,0 +1,505 @@
+__PIPELINE_INFO__:
+    name: 'REALIGN'
+    version: 'v1.0.0'
+    author: 'ppararaj <ppararaj@sfu.ca>'
+    data_type: 'BAM'
+    input_type: 'BAM'
+    output_type: 'BAM'
+    host_cluster: 'genesis'
+    date_created: '22 DECEMBER 2015'
+    date_last_updated: '3 January 2015'
+    factory_version: '2.0.4'
+
+
+__GENERAL__:
+    python: '/path/to/python2.7' # MUST CONTAIN PYSAM MODULE
+    samtools: '/path/to/samtools'
+    rm: 'rm'
+    bamhash_checksum_bam: '/path/to/bamhash_checksum_bam'
+    hash_read_names: '/path/to/hash_read_names.py'
+    bwa: '/path/to/bwa'
+    pysam_bam2fq: '/path/to/pysam_bam2fq.py'
+    picard_binary: '/path/to/picard.jar'
+    gatk_binary: '/path/to/GenomeAnalysisTK.jar'
+    java_binary: '/path/to/java'
+
+
+__SHARED__:
+    input_ref: '/path/to/human_genome_reference'
+    gatk_ref: '/path/to/gatk_reference'
+    use_cluster: True
+
+
+__SAMPLES__:
+    SAMPLE_ID:
+        outdir: '<outdir>' # THIS DIRECTORY MUST EXIST PRIOR TO RUNNING PIPELINE
+        interval_file: '<outdir>/interval.txt' # MUST SPECIFY ABSOLUTE PATH TO AN EXISTING INTERVAL FILE (CANNOT USE $sample_id)
+        input_bam: '/path/to/bam_to_realign'
+        original_checksum: 'original_bam_checksum_filename'
+        new_checksum: 'new_bam_checksum_filename'
+        hash_sum: 'hashsum_filename'
+        realigned_bam: 'realigned_bam_filename.bam'
+        rg_bam: 'add_or_replace_read_group_filename.rg.bam'
+        md_bam: 'mark_duplicate_filename.md.bam'
+        dup_file: 'mark_duplicate_metrics_filename'
+        indel_interval_file: 'GATK_target_creator_interval_filename'
+        indel_realigned_bam: 'indel_realigned.bam'
+        clipoverlap_bam: 'final.bam'
+
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 1  ----------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__BAM2FQ__:
+    reserved:
+        component_name: 'pysam_bam2fq'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '5G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: True
+    component:
+        input_files:
+            bam: ("__SAMPLES__", "input_bam")
+        output_files:
+            outdir: ("__SAMPLES__", "outdir")
+
+
+__BAMHASH_ORIGINAL__:
+    reserved:
+        component_name: 'bamhash_checksum_bam'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '5G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+    component:
+        input_files:
+            in_bams: ("__SAMPLES__", "input_bam")
+        output_files:
+            out_checksum: ("__SAMPLES__", "original_checksum")
+
+
+__HASH_READ_NAMES_ORIGINAL__:
+    reserved:
+        component_name: 'hash_read_names'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '5G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+    component:
+        input_files:
+            original_bam: ("__SAMPLES__", "input_bam")
+        output_files:
+            hash_sum_outfile: ("__SAMPLES__", "hash_sum")
+
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 2  ----------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__BWA_MEM__:
+    reserved:
+        component_name: 'bwa_mem_parallelized'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '6G'
+        num_cpus: 1
+        forced_dependencies: ['__BAM2FQ__']
+        add_breakpoint: False
+        parallel_run: True
+        interval_file: ('__SAMPLES__', 'interval_file')
+    component:
+        input_files:
+            input_dir: ('__SAMPLES__', 'outdir')
+            bwa_index_prefix: ('__SHARED__', 'input_ref')
+        output_files:
+            output_dir: ('__SAMPLES__', 'outdir')
+
+
+__HASH_READ_NAMES_BAM2FQ__:
+    reserved:
+        component_name: 'hash_read_names'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '5G'
+        num_cpus: 1
+        forced_dependencies: ['__BAM2FQ__']
+        add_breakpoint: False
+    component:
+        input_files:
+            hash_sum_infile: ('__SAMPLES__', 'hash_sum')
+        output_files:
+            new_fastqs: '<outdir>/*.fastq*'
+
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 3  ----------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__SAMTOOLS_SORT__:
+    reserved:
+        component_name: 'samtools_sort_parallelized'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '6G'
+        num_cpus: 1
+        forced_dependencies: ['__BWA_MEM__']
+        add_breakpoint: False
+        parallel_run: True
+        parallel_params: []
+        interval_file: ('__SAMPLES__', 'interval_file')
+    component:
+        input_files:
+            input_dir: ('__SAMPLES__', 'outdir')
+        output_files:
+            output_dir: ('__SAMPLES__', 'outdir')
+
+
+__HASH_READ_NAMES_BWA_MEM__:
+    reserved:
+        component_name: 'hash_read_names'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '5G'
+        num_cpus: 1
+        forced_dependencies: ['__BWA_MEM__']
+        add_breakpoint: False
+    component:
+        input_files:
+            hash_sum_infile: ('__SAMPLES__', 'hash_sum')
+        output_files:
+            new_bams: '<outdir>/*.unsorted.bam'
+
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 4  ----------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__SAMTOOLS_MERGE__:
+    reserved:
+        component_name: 'samtools_merge'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '6G'
+        num_cpus: 1
+        forced_dependencies: ['__SAMTOOLS_SORT__']
+        add_breakpoint: False
+    component:
+        input_files:
+            input_dir: ('__SAMPLES__', 'outdir')
+        output_files:
+            output_file: ('__SAMPLES__', 'realigned_bam')
+
+
+__REMOVE_FASTQS__:
+    reserved:
+        component_name: 'delete_files'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0.0'
+    run:
+        use_cluster: False
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ['__HASH_READ_NAMES_BWA_MEM__']
+        add_breakpoint: False
+    component:
+        input_files:
+            files: '<outdir>/*.fastq*'
+
+
+__REMOVE_UNSORTED_BAMS__:
+    reserved:
+        component_name: 'delete_files'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0.0'
+    run:
+        use_cluster: False
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ['__SAMTOOLS_SORT__']
+        add_breakpoint: False
+    component:
+        input_files:
+            files: '<outdir>/*.unsorted.bam'
+
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 5  ----------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__PICARD_ADD_OR_REPLACE_READ_GROUPS__:
+    reserved:
+        component_name: 'picard_add_or_replace_read_groups'
+        component_version: 'v1.0.0'
+        seed_version: '1.136'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '3G'
+        num_cpus: 1
+        forced_dependencies: ['__SAMTOOLS_MERGE__']
+        add_breakpoint: False
+    component:
+        input_files:
+            INPUT: ('__SAMPLES__', 'realigned_bam')
+        output_files:
+            OUTPUT: ('__SAMPLES__', 'rg_bam')
+        parameters:
+            RGPL: 'illumina'
+            RGPU: 'u'
+            picard_command: 'AddOrReplaceReadGroups'
+            RGSM: 'DLBCL'
+            RGLB: 'gl'
+
+
+__REMOVE_SORTED_BAMS__:
+    reserved:
+        component_name: 'delete_files'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0.0'
+    run:
+        use_cluster: False
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ['__SAMTOOLS_MERGE__']
+        add_breakpoint: False
+    component:
+        input_files:
+            files: '<outdir>/*.sorted.bam'
+
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 6  ----------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__PICARD_MARK_DUPLICATES__:
+    reserved:
+        component_name: 'picard_mark_duplicates'
+        component_version: 'v1.0.0'
+        seed_version: '1.136'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '3G'
+        num_cpus: 1
+        forced_dependencies: ['__PICARD_ADD_OR_REPLACE_READ_GROUPS__']
+        add_breakpoint: False
+    component:
+        input_files:
+            INPUT: ('__SAMPLES__', 'rg_bam')
+        output_files:
+            OUTPUT: ('__SAMPLES__', 'md_bam')
+            METRICS_FILE: ('__SAMPLES__', 'dup_file')
+        parameters:
+            picard_command: 'MarkDuplicates'
+            ASSUME_SORTED: True
+
+
+__REMOVE_MERGED_BAM__:
+    reserved:
+        component_name: 'delete_files'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0.0'
+    run:
+        use_cluster: False
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ['__PICARD_ADD_OR_REPLACE_READ_GROUPS__']
+        add_breakpoint: False
+    component:
+        input_files:
+            files: ('__SAMPLES__', 'realigned_bam')
+
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 7  ----------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__GATK_REALIGNER_TARGET_CREATOR__:
+    reserved:
+        component_name: 'gatk_realigner_target_creator'
+        component_version: 'v1.0.0'
+        seed_version: '3.4-0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '6G'
+        num_cpus: 1
+        forced_dependencies: ['__PICARD_MARK_DUPLICATES__']
+        add_breakpoint: False
+    component:
+        input_files:
+            input_file: ('__SAMPLES__', 'md_bam')
+            reference_sequence: ('__SHARED__', 'gatk_ref')
+        output_files:
+            out: ('__SAMPLES__','indel_interval_file')
+        parameters:
+            java_memory: '5G'
+            analysis_type: 'RealignerTargetCreator'
+
+
+__REMOVE_READGROUP_BAM__:
+    reserved:
+        component_name: 'delete_files'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0.0'
+    run:
+        use_cluster: False
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ['__PICARD_MARK_DUPLICATES__']
+        add_breakpoint: False
+    component:
+        input_files:
+            files: ('__SAMPLES__', 'rg_bam')
+
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 8  ----------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__GATK_INDEL_REALIGNER__:
+    reserved:
+        component_name: 'gatk_indel_realigner'
+        component_version: 'v1.0.0'
+        seed_version: '3.4-0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '6G'
+        num_cpus: 1
+        forced_dependencies: ['__GATK_REALIGNER_TARGET_CREATOR__']
+        add_breakpoint: False
+    component:
+        input_files:
+            input_file: ('__SAMPLES__', 'md_bam')
+            targetIntervals: ('__SAMPLES__', 'indel_interval_file')
+            reference_sequence: ('__SHARED__', 'gatk_ref')
+        output_files:
+            out: ('__SAMPLES__', 'indel_realigned_bam')
+        parameters:
+            analysis_type: 'IndelRealigner'
+            java_memory: '5G'
+
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 9  ----------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__BAMUTIL_CLIPOVERLAP__:
+    reserved:
+        # do not change this section.
+        component_name: 'clipoverlap'
+        component_version: '1.0.0'
+        seed_version: '2.16'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '3G'
+        num_cpus: 1
+        forced_dependencies: ['__GATK_INDEL_REALIGNER__']
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            input_file: ('__SAMPLES__', 'indel_realigned_bam')
+        output_files:
+            output_file: ('__SAMPLES__', 'clipoverlap_bam')
+        parameters:
+
+
+__REMOVE_MARK_DUPLICATES_BAM__:
+    reserved:
+        component_name: 'delete_files'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0.0'
+    run:
+        use_cluster: False
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ['__GATK_INDEL_REALIGNER__']
+        add_breakpoint: False
+    component:
+        input_files:
+            files: ('__SAMPLES__', 'md_bam')
+
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 10  ---------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__BAMHASH_FINAL__:
+    reserved:
+        component_name: 'bamhash_checksum_bam'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '5G'
+        num_cpus: 1
+        forced_dependencies: ['__BAMUTIL_CLIPOVERLAP__']
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            in_bams: ("__SAMPLES__", "clipoverlap_bam")
+        output_files:
+            out_checksum: ("__SAMPLES__", "new_checksum")
+
+
+__HASH_READ_NAMES_CLIPOVERLAP__:
+    reserved:
+        component_name: 'hash_read_names'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '5G'
+        num_cpus: 1
+        forced_dependencies: ['__BAMUTIL_CLIPOVERLAP__']
+        add_breakpoint: False
+    component:
+        input_files:
+            hash_sum_infile: ('__SAMPLES__', 'hash_sum')
+        output_files:
+            new_bams: ('__SAMPLES__', 'indel_realigned_bam')
+
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 11  ---------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__REMOVE_INDEL_REALIGNED_BAM__:
+    reserved:
+        component_name: 'delete_files'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0.0'
+    run:
+        use_cluster: False
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ['__HASH_READ_NAMES_CLIPOVERLAP__']
+        add_breakpoint: False
+    component:
+        input_files:
+            files: ('__SAMPLES__', 'md_bam')
