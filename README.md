@@ -1,3 +1,3 @@
-# Pipelines
+# Kronos Pipelines
 
-This repository contains pipelines developed by the Morin lab for the Pipeline Factory.
+This repository contains Kronos pipelines used by the Morin lab. 
