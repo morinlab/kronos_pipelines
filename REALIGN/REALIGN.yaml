@@ -25,26 +25,14 @@ __GENERAL__:
 
 
 __SHARED__:
-    input_ref: '/path/to/human_genome_reference'
-    gatk_ref: '/path/to/gatk_reference'
+    reference: '/path/to/human_genome_reference'  # GATK-compatible
+    interval_file: "/path/to/empty/file"  # Blank interval file
     use_cluster: True
 
 
 __SAMPLES__:
     SAMPLE_ID:
-        outdir: '<outdir>' # THIS DIRECTORY MUST EXIST PRIOR TO RUNNING PIPELINE
-        interval_file: '<outdir>/interval.txt' # MUST SPECIFY ABSOLUTE PATH TO AN EXISTING INTERVAL FILE (CANNOT USE $sample_id)
         input_bam: '/path/to/bam_to_realign'
-        original_checksum: 'original_bam_checksum_filename'
-        new_checksum: 'new_bam_checksum_filename'
-        hash_sum: 'hashsum_filename'
-        realigned_bam: 'realigned_bam_filename.bam'
-        rg_bam: 'add_or_replace_read_group_filename.rg.bam'
-        md_bam: 'mark_duplicate_filename.md.bam'
-        dup_file: 'mark_duplicate_metrics_filename'
-        indel_interval_file: 'GATK_target_creator_interval_filename'
-        indel_realigned_bam: 'indel_realigned.bam'
-        clipoverlap_bam: 'final.bam'
 
 
 # -------------------------------------------------------------------------------- #
@@ -66,7 +54,8 @@ __BAM2FQ__:
         input_files:
             bam: ("__SAMPLES__", "input_bam")
         output_files:
-            outdir: ("__SAMPLES__", "outdir")
+            outdir: "1-bam2fq/"
+            interval_file: 1-bam2fq/$sample_id.chunks.txt
 
 
 __BAMHASH_ORIGINAL__:
@@ -84,7 +73,7 @@ __BAMHASH_ORIGINAL__:
         input_files:
             in_bams: ("__SAMPLES__", "input_bam")
         output_files:
-            out_checksum: ("__SAMPLES__", "original_checksum")
+            out_checksum: "1-bamhash_original/hashsum.txt"
 
 
 __HASH_READ_NAMES_ORIGINAL__:
@@ -102,7 +91,7 @@ __HASH_READ_NAMES_ORIGINAL__:
         input_files:
             original_bam: ("__SAMPLES__", "input_bam")
         output_files:
-            hash_sum_outfile: ("__SAMPLES__", "hash_sum")
+            hash_sum_outfile: "1-hash_read_names_original/hashsum.txt"
 
 
 # -------------------------------------------------------------------------------- #
@@ -118,16 +107,16 @@ __BWA_MEM__:
         use_cluster: ("__SHARED__", "use_cluster")
         memory: '6G'
         num_cpus: 1
-        forced_dependencies: ['__BAM2FQ__']
+        forced_dependencies: []
         add_breakpoint: False
         parallel_run: True
-        interval_file: ('__SAMPLES__', 'interval_file')
+        interval_file: ('__SHARED__', 'interval_file')
     component:
         input_files:
-            input_dir: ('__SAMPLES__', 'outdir')
+            input_dir: ("__BAM2FQ__", "outdir")
             bwa_index_prefix: ('__SHARED__', 'input_ref')
         output_files:
-            output_dir: ('__SAMPLES__', 'outdir')
+            output_dir: "2-bwa_mem/"
 
 
 __HASH_READ_NAMES_BAM2FQ__:
@@ -143,7 +132,7 @@ __HASH_READ_NAMES_BAM2FQ__:
         add_breakpoint: False
     component:
         input_files:
-            hash_sum_infile: ('__SAMPLES__', 'hash_sum')
+            hash_sum_infile: ("__HASH_READ_NAMES_ORIGINAL__", "hash_sum_outfile")
         output_files:
             new_fastqs: '<outdir>/*.fastq*'
 
@@ -161,16 +150,16 @@ __SAMTOOLS_SORT__:
         use_cluster: ("__SHARED__", "use_cluster")
         memory: '6G'
         num_cpus: 1
-        forced_dependencies: ['__BWA_MEM__']
+        forced_dependencies: []
         add_breakpoint: False
         parallel_run: True
         parallel_params: []
         interval_file: ('__SAMPLES__', 'interval_file')
     component:
         input_files:
-            input_dir: ('__SAMPLES__', 'outdir')
+            input_dir: ("__BWA_MEM__", "output_dir")
         output_files:
-            output_dir: ('__SAMPLES__', 'outdir')
+            output_dir: "3-samtools_sort/"
 
 
 __HASH_READ_NAMES_BWA_MEM__:
@@ -186,7 +175,7 @@ __HASH_READ_NAMES_BWA_MEM__:
         add_breakpoint: False
     component:
         input_files:
-            hash_sum_infile: ('__SAMPLES__', 'hash_sum')
+            hash_sum_infile: ("__HASH_READ_NAMES_ORIGINAL__", "hash_sum_outfile")
         output_files:
             new_bams: '<outdir>/*.unsorted.bam'
 
@@ -204,13 +193,13 @@ __SAMTOOLS_MERGE__:
         use_cluster: ("__SHARED__", "use_cluster")
         memory: '6G'
         num_cpus: 1
-        forced_dependencies: ['__SAMTOOLS_SORT__']
+        forced_dependencies: ["__BAM2FQ__", "__BWA_MEM__", '__SAMTOOLS_SORT__']
         add_breakpoint: False
     component:
         input_files:
-            input_dir: ('__SAMPLES__', 'outdir')
+            input_dir: "3-samtools_sort/"  # Must be in sync with __SAMTOOLS_SORT__'s output_dir
         output_files:
-            output_file: ('__SAMPLES__', 'realigned_bam')
+            output_file: "4-samtools_merge/$sample_id.merge.bam"
 
 
 __REMOVE_FASTQS__:
@@ -258,19 +247,19 @@ __PICARD_ADD_OR_REPLACE_READ_GROUPS__:
         use_cluster: ("__SHARED__", "use_cluster")
         memory: '3G'
         num_cpus: 1
-        forced_dependencies: ['__SAMTOOLS_MERGE__']
+        forced_dependencies: []
         add_breakpoint: False
     component:
         input_files:
-            INPUT: ('__SAMPLES__', 'realigned_bam')
+            INPUT: ('__SAMTOOLS_MERGE__', 'output_file')
         output_files:
-            OUTPUT: ('__SAMPLES__', 'rg_bam')
+            OUTPUT: "5-picard_add_or_replace_read_groups/$sample_id.merge.rg.bam"
         parameters:
             RGPL: 'illumina'
-            RGPU: 'u'
+            RGPU: 'run1'
             picard_command: 'AddOrReplaceReadGroups'
-            RGSM: 'DLBCL'
-            RGLB: 'gl'
+            RGSM: '$sample_id'
+            RGLB: '$sample_id'
 
 
 __REMOVE_SORTED_BAMS__:
@@ -302,14 +291,14 @@ __PICARD_MARK_DUPLICATES__:
         use_cluster: ("__SHARED__", "use_cluster")
         memory: '3G'
         num_cpus: 1
-        forced_dependencies: ['__PICARD_ADD_OR_REPLACE_READ_GROUPS__']
+        forced_dependencies: []
         add_breakpoint: False
     component:
         input_files:
-            INPUT: ('__SAMPLES__', 'rg_bam')
+            INPUT: ('__PICARD_ADD_OR_REPLACE_READ_GROUPS__', 'OUTPUT')
         output_files:
-            OUTPUT: ('__SAMPLES__', 'md_bam')
-            METRICS_FILE: ('__SAMPLES__', 'dup_file')
+            OUTPUT: "6-picard_mark_duplicates/$sample_id.merge.rg.mdups.bam"
+            METRICS_FILE: "6-picard_mark_duplicates/$sample_id.metrics.txt"
         parameters:
             picard_command: 'MarkDuplicates'
             ASSUME_SORTED: True
@@ -328,7 +317,7 @@ __REMOVE_MERGED_BAM__:
         add_breakpoint: False
     component:
         input_files:
-            files: ('__SAMPLES__', 'realigned_bam')
+            files: ("__SAMTOOLS_MERGE__", "output_file")
 
 
 # -------------------------------------------------------------------------------- #
@@ -344,14 +333,14 @@ __GATK_REALIGNER_TARGET_CREATOR__:
         use_cluster: ("__SHARED__", "use_cluster")
         memory: '6G'
         num_cpus: 1
-        forced_dependencies: ['__PICARD_MARK_DUPLICATES__']
+        forced_dependencies: []
         add_breakpoint: False
     component:
         input_files:
-            input_file: ('__SAMPLES__', 'md_bam')
-            reference_sequence: ('__SHARED__', 'gatk_ref')
+            input_file: ("__PICARD_MARK_DUPLICATES__", "OUTPUT")
+            reference_sequence: ("__SHARED__", "reference")
         output_files:
-            out: ('__SAMPLES__','indel_interval_file')
+            out: "7-gatk_realigner_target_creator/$sample_id.realigner_targets.txt"
         parameters:
             java_memory: '5G'
             analysis_type: 'RealignerTargetCreator'
@@ -370,7 +359,7 @@ __REMOVE_READGROUP_BAM__:
         add_breakpoint: False
     component:
         input_files:
-            files: ('__SAMPLES__', 'rg_bam')
+            files: ("__PICARD_ADD_OR_REPLACE_READ_GROUPS__", "OUTPUT")
 
 
 # -------------------------------------------------------------------------------- #
@@ -386,15 +375,15 @@ __GATK_INDEL_REALIGNER__:
         use_cluster: ("__SHARED__", "use_cluster")
         memory: '6G'
         num_cpus: 1
-        forced_dependencies: ['__GATK_REALIGNER_TARGET_CREATOR__']
+        forced_dependencies: []
         add_breakpoint: False
     component:
         input_files:
-            input_file: ('__SAMPLES__', 'md_bam')
-            targetIntervals: ('__SAMPLES__', 'indel_interval_file')
-            reference_sequence: ('__SHARED__', 'gatk_ref')
+            input_file: ("__PICARD_MARK_DUPLICATES__", "OUTPUT")
+            targetIntervals: ("__GATK_REALIGNER_TARGET_CREATOR__", "out")
+            reference_sequence: ("__SHARED__", "reference")
         output_files:
-            out: ('__SAMPLES__', 'indel_realigned_bam')
+            out: "8-gatk_indel_realigner/$sample_id.merge.rg.mdups.realn.bam"
         parameters:
             analysis_type: 'IndelRealigner'
             java_memory: '5G'
@@ -415,15 +404,15 @@ __BAMUTIL_CLIPOVERLAP__:
         use_cluster: ("__SHARED__", "use_cluster")
         memory: '3G'
         num_cpus: 1
-        forced_dependencies: ['__GATK_INDEL_REALIGNER__']
+        forced_dependencies: []
         add_breakpoint: False
         env_vars:
         boilerplate:
     component:
         input_files:
-            input_file: ('__SAMPLES__', 'indel_realigned_bam')
+            input_file: ("__GATK_INDEL_REALIGNER__", "out")
         output_files:
-            output_file: ('__SAMPLES__', 'clipoverlap_bam')
+            output_file: "9-bamutil_clipoverlap/$sample_id.merge.rg.mdups.realn.clipolap.bam"
         parameters:
 
 
@@ -440,12 +429,34 @@ __REMOVE_MARK_DUPLICATES_BAM__:
         add_breakpoint: False
     component:
         input_files:
-            files: ('__SAMPLES__', 'md_bam')
+            files: ("__PICARD_MARK_DUPLICATES__", "OUTPUT")
 
 
 # -------------------------------------------------------------------------------- #
 # -----------------------------------  Wave 10  ---------------------------------- #
 # -------------------------------------------------------------------------------- #
+
+__SAMTOOLS_INDEX__:
+    reserved:
+        # do not change this section.
+        component_name: 'samtools_index'
+        component_version: 'v1.0.0'
+        seed_version: 'v0.1.19'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            bam_file: ("__BAMUTIL_CLIPOVERLAP__", "output_file")
+        output_files:
+        parameters:
+
 
 __BAMHASH_FINAL__:
     reserved:
@@ -456,15 +467,15 @@ __BAMHASH_FINAL__:
         use_cluster: ("__SHARED__", "use_cluster")
         memory: '5G'
         num_cpus: 1
-        forced_dependencies: ['__BAMUTIL_CLIPOVERLAP__']
+        forced_dependencies: []
         add_breakpoint: False
         env_vars:
         boilerplate:
     component:
         input_files:
-            in_bams: ("__SAMPLES__", "clipoverlap_bam")
+            in_bams: ("__BAMUTIL_CLIPOVERLAP__", "output_file")
         output_files:
-            out_checksum: ("__SAMPLES__", "new_checksum")
+            out_checksum: "10-bamhash_final/hashsum_final.txt"
 
 
 __HASH_READ_NAMES_CLIPOVERLAP__:
@@ -480,7 +491,7 @@ __HASH_READ_NAMES_CLIPOVERLAP__:
         add_breakpoint: False
     component:
         input_files:
-            hash_sum_infile: ('__SAMPLES__', 'hash_sum')
+            hash_sum_infile: ("__HASH_READ_NAMES_ORIGINAL__", "hash_sum_outfile")
         output_files:
             new_bams: ('__SAMPLES__', 'indel_realigned_bam')
 
@@ -502,4 +513,4 @@ __REMOVE_INDEL_REALIGNED_BAM__:
         add_breakpoint: False
     component:
         input_files:
-            files: ('__SAMPLES__', 'md_bam')
+            files: ("__GATK_INDEL_REALIGNER__", "out")
