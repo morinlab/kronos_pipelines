@@ -41,12 +41,14 @@ __SAMPLES__:
 
 __BAM2FQ__:
     reserved:
+        # do not change this section.
         component_name: 'pysam_bam2fq'
         component_version: 'v1.0.0'
-        seed_version: 'v1.0'
+        seed_version: 'v1.0.0'
     run:
+        # NOTE: component cannot run in parallel mode.
         use_cluster: ("__SHARED__", "use_cluster")
-        memory: '5G'
+        memory: '6G'
         num_cpus: 1
         forced_dependencies: []
         add_breakpoint: True
@@ -56,6 +58,14 @@ __BAM2FQ__:
         output_files:
             outdir: "1-bam2fq/"
             interval_file: 1-bam2fq/$sample_id.chunks.txt
+    component:
+        input_files:
+            bam: ("__SAMPLES__", "input_bam")
+        output_files:
+            interval_file: "1-bam2fq/intervals.txt"
+            output_dir: "1-bam2fq/"
+        parameters:
+            num_reads: '__OPTIONAL__'
 
 
 __BAMHASH_ORIGINAL__:
@@ -133,8 +143,11 @@ __HASH_READ_NAMES_BAM2FQ__:
     component:
         input_files:
             hash_sum_infile: ("__HASH_READ_NAMES_ORIGINAL__", "hash_sum_outfile")
+            new_fastqs: True
+            directory: ("__BAM2FQ__", "output_dir")
+            files: "*.fastq.gz"
         output_files:
-            new_fastqs: '<outdir>/*.fastq*'
+            hash_sum_outfile: "2-hash_read_names_bam2fq/hashsum.txt"
 
 
 # -------------------------------------------------------------------------------- #
@@ -154,7 +167,7 @@ __SAMTOOLS_SORT__:
         add_breakpoint: False
         parallel_run: True
         parallel_params: []
-        interval_file: ('__SAMPLES__', 'interval_file')
+        interval_file: ('__SHARED__', 'interval_file')
     component:
         input_files:
             input_dir: ("__BWA_MEM__", "output_dir")
@@ -176,8 +189,11 @@ __HASH_READ_NAMES_BWA_MEM__:
     component:
         input_files:
             hash_sum_infile: ("__HASH_READ_NAMES_ORIGINAL__", "hash_sum_outfile")
+            new_bams: True
+            directory: ("__BWA_MEM__", "output_dir")
+            files: "*.unsorted.bam"
         output_files:
-            new_bams: '<outdir>/*.unsorted.bam'
+            hash_sum_outfile: 3-hash_read_names_bwa_mem/hashsum.txt
 
 
 # -------------------------------------------------------------------------------- #
@@ -215,7 +231,9 @@ __REMOVE_FASTQS__:
         add_breakpoint: False
     component:
         input_files:
-            files: '<outdir>/*.fastq*'
+            input_dir: ("__BAM2FQ__", "output_dir")
+        parameters:
+            file_extension: "*.fastq.gz"
 
 
 __REMOVE_UNSORTED_BAMS__:
@@ -231,7 +249,9 @@ __REMOVE_UNSORTED_BAMS__:
         add_breakpoint: False
     component:
         input_files:
-            files: '<outdir>/*.unsorted.bam'
+            input_dir: ("__BWA_MEM__", "output_dir")
+        parameters:
+            file_extension: "*.unsorted.bam"
 
 
 # -------------------------------------------------------------------------------- #
@@ -275,7 +295,9 @@ __REMOVE_SORTED_BAMS__:
         add_breakpoint: False
     component:
         input_files:
-            files: '<outdir>/*.sorted.bam'
+            input_dir: ("__SAMTOOLS_SORT__", "output_dir")
+        parameters:
+            file_extension: "*.sorted.bam"
 
 
 # -------------------------------------------------------------------------------- #
