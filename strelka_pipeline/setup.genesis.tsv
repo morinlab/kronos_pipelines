@@ -1,0 +1,11 @@
+__GENERAL__	bamutils	/extscratch/morinlab/software/bamUtil/1.0.13/bam
+__GENERAL__	samtools	/extscratch/morinlab/software/samtools/0.1.19/bin/samtools
+__GENERAL__	perl	/extscratch/morinlab/software/perlbrew/0.73/perls/perl-5.22.0/bin/perl
+__GENERAL__	configureStrelkaWorkflow.pl	/extscratch/morinlab/software/strelka_workflow/1.0.14/bin/configureStrelkaWorkflow.pl
+__GENERAL__	make	/usr/bin/make
+__GENERAL__	python	/extscratch/morinlab/software/anaconda/2.3.0/bin/python
+__GENERAL__	vcf2maf.pl	/extscratch/morinlab/software/vcf2maf/1.6.2/vcf2maf.pl
+__SHARED__	reference	/extscratch/morinlab/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Sequence/WholeGenomeFasta/GRCh37-lite.fa
+__SHARED__	vep_path	/extscratch/morinlab/software/ensembl-tools-release/81/scripts/variant_effect_predictor/
+__SHARED__	vep_data_dir	/extscratch/morinlab/reference/ensembl_vep_cache
+__SHARED__	setup_env	. /extscratch/morinlab/env.sh

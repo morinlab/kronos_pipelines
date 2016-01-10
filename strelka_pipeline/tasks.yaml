@@ -273,8 +273,8 @@ __TASK_VCF2MAF_SNVS_MUTATIONSEQ__:
     run:
         # NOTE: component cannot run in parallel mode.
         use_cluster: True
-        memory: ("__SHARED__", "vep_mem")
-        num_cpus: ("__SHARED__", "vep_threads")
+        memory: 20G
+        num_cpus: 1
         forced_dependencies: []
         add_breakpoint: False
         env_vars:
