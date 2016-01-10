@@ -14,7 +14,6 @@ __PIPELINE_INFO__:
 __GENERAL__:
     python: '/path/to/python2.7' # MUST CONTAIN PYSAM MODULE
     samtools: '/path/to/samtools'
-    rm: 'rm'
     bamhash_checksum_bam: '/path/to/bamhash_checksum_bam'
     hash_read_names: '/path/to/hash_read_names.py'
     bwa: '/path/to/bwa'
@@ -26,7 +25,6 @@ __GENERAL__:
 
 __SHARED__:
     reference: '/path/to/human_genome_reference'  # GATK-compatible
-    interval_file: "/path/to/empty/file"  # Blank interval file
     use_cluster: True
 
 
@@ -120,7 +118,7 @@ __BWA_MEM__:
         forced_dependencies: []
         add_breakpoint: False
         parallel_run: True
-        interval_file: ('__SHARED__', 'interval_file')
+        interval_file: ""
     component:
         input_files:
             input_dir: ("__BAM2FQ__", "outdir")
@@ -167,7 +165,7 @@ __SAMTOOLS_SORT__:
         add_breakpoint: False
         parallel_run: True
         parallel_params: []
-        interval_file: ('__SHARED__', 'interval_file')
+        interval_file: ""
     component:
         input_files:
             input_dir: ("__BWA_MEM__", "output_dir")
