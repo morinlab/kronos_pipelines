@@ -1,0 +1,2 @@
+#sample_id	tumour_bam	tumour_id	normal_bam	normal_id	is_genome
+LS1065	/data/LS1065.bam	LS1065	/data/LS1065N.bam	LS1065N	False

@@ -1,0 +1,381 @@
+
+
+__SAMPLES__:
+    LS1065:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS1065.bam"
+        tumour_id: "LS1065"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS1065N.bam"
+        normal_id: "LS1065N"
+        is_genome: False
+    LS1098:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS1098.bam"
+        tumour_id: "LS1098"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS1098N.bam"
+        normal_id: "LS1098N"
+        is_genome: False
+    LS1395:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS1395.bam"
+        tumour_id: "LS1395"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS1395N.bam"
+        normal_id: "LS1395N"
+        is_genome: False
+    LS146:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS146.bam"
+        tumour_id: "LS146"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS146N.bam"
+        normal_id: "LS146N"
+        is_genome: False
+    LS148:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS148.bam"
+        tumour_id: "LS148"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS148N.bam"
+        normal_id: "LS148N"
+        is_genome: False
+    LS1546:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS1546.bam"
+        tumour_id: "LS1546"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS1546N.bam"
+        normal_id: "LS1546N"
+        is_genome: False
+    LS155:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS155.bam"
+        tumour_id: "LS155"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS155N.bam"
+        normal_id: "LS155N"
+        is_genome: False
+    LS1583:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS1583.bam"
+        tumour_id: "LS1583"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS1583N.bam"
+        normal_id: "LS1583N"
+        is_genome: False
+    LS1620:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS1620.bam"
+        tumour_id: "LS1620"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS1620N.bam"
+        normal_id: "LS1620N"
+        is_genome: False
+    LS1668:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS1668.bam"
+        tumour_id: "LS1668"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS1668N.bam"
+        normal_id: "LS1668N"
+        is_genome: False
+    LS1683:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS1683.bam"
+        tumour_id: "LS1683"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS1683N.bam"
+        normal_id: "LS1683N"
+        is_genome: False
+    LS1757:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS1757.bam"
+        tumour_id: "LS1757"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS1757N.bam"
+        normal_id: "LS1757N"
+        is_genome: False
+    LS1899:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS1899.bam"
+        tumour_id: "LS1899"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS1899N.bam"
+        normal_id: "LS1899N"
+        is_genome: False
+    LS1921:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS1921.bam"
+        tumour_id: "LS1921"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS1921N.bam"
+        normal_id: "LS1921N"
+        is_genome: False
+    LS2089:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS2089.bam"
+        tumour_id: "LS2089"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS2089N.bam"
+        normal_id: "LS2089N"
+        is_genome: False
+    LS2154:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS2154.bam"
+        tumour_id: "LS2154"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS2154N.bam"
+        normal_id: "LS2154N"
+        is_genome: False
+    LS2208:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS2208.bam"
+        tumour_id: "LS2208"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS2208N.bam"
+        normal_id: "LS2208N"
+        is_genome: False
+    LS2245:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS2245.bam"
+        tumour_id: "LS2245"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS2245N.bam"
+        normal_id: "LS2245N"
+        is_genome: False
+    LS2258:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS2258.bam"
+        tumour_id: "LS2258"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS2258N.bam"
+        normal_id: "LS2258N"
+        is_genome: False
+    LS2264:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS2264.bam"
+        tumour_id: "LS2264"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS2264N.bam"
+        normal_id: "LS2264N"
+        is_genome: False
+    LS2305:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS2305.bam"
+        tumour_id: "LS2305"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS2305N.bam"
+        normal_id: "LS2305N"
+        is_genome: False
+    LS2328:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS2328.bam"
+        tumour_id: "LS2328"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS2328N.bam"
+        normal_id: "LS2328N"
+        is_genome: False
+    LS2357:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS2357.bam"
+        tumour_id: "LS2357"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS2357N.bam"
+        normal_id: "LS2357N"
+        is_genome: False
+    LS2367:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS2367.bam"
+        tumour_id: "LS2367"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS2367N.bam"
+        normal_id: "LS2367N"
+        is_genome: False
+    LS2590:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS2590.bam"
+        tumour_id: "LS2590"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS2590N.bam"
+        normal_id: "LS2590N"
+        is_genome: False
+    LS2596:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS2596.bam"
+        tumour_id: "LS2596"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS2596N.bam"
+        normal_id: "LS2596N"
+        is_genome: False
+    LS2599:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS2599.bam"
+        tumour_id: "LS2599"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS2599N.bam"
+        normal_id: "LS2599N"
+        is_genome: False
+    LS2978:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS2978.bam"
+        tumour_id: "LS2978"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS2978N.bam"
+        normal_id: "LS2978N"
+        is_genome: False
+    LS297:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS297.bam"
+        tumour_id: "LS297"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS297N.bam"
+        normal_id: "LS297N"
+        is_genome: False
+    LS3200:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS3200.bam"
+        tumour_id: "LS3200"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS3200N.bam"
+        normal_id: "LS3200N"
+        is_genome: False
+    LS3204:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS3204.bam"
+        tumour_id: "LS3204"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS3204N.bam"
+        normal_id: "LS3204N"
+        is_genome: False
+    LS3245:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS3245.bam"
+        tumour_id: "LS3245"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS3245N.bam"
+        normal_id: "LS3245N"
+        is_genome: False
+    LS3271:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS3271.bam"
+        tumour_id: "LS3271"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS3271N.bam"
+        normal_id: "LS3271N"
+        is_genome: False
+    LS3309:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS3309.bam"
+        tumour_id: "LS3309"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS3309N.bam"
+        normal_id: "LS3309N"
+        is_genome: False
+    LS3387:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS3387.bam"
+        tumour_id: "LS3387"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS3387N.bam"
+        normal_id: "LS3387N"
+        is_genome: False
+    LS3499:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS3499.bam"
+        tumour_id: "LS3499"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS3499N.bam"
+        normal_id: "LS3499N"
+        is_genome: False
+    LS3615:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS3615.bam"
+        tumour_id: "LS3615"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS3615N.bam"
+        normal_id: "LS3615N"
+        is_genome: False
+    LS3749:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS3749.bam"
+        tumour_id: "LS3749"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS3749N.bam"
+        normal_id: "LS3749N"
+        is_genome: False
+    LS378:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS378.bam"
+        tumour_id: "LS378"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS378N.bam"
+        normal_id: "LS378N"
+        is_genome: False
+    LS3808:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS3808.bam"
+        tumour_id: "LS3808"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS3808N.bam"
+        normal_id: "LS3808N"
+        is_genome: False
+    LS3820:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS3820.bam"
+        tumour_id: "LS3820"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS3820N.bam"
+        normal_id: "LS3820N"
+        is_genome: False
+    LS3866:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS3866.bam"
+        tumour_id: "LS3866"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS3866N.bam"
+        normal_id: "LS3866N"
+        is_genome: False
+    LS4085:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS4085.bam"
+        tumour_id: "LS4085"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS4085N.bam"
+        normal_id: "LS4085N"
+        is_genome: False
+    LS420:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS420.bam"
+        tumour_id: "LS420"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS420N.bam"
+        normal_id: "LS420N"
+        is_genome: False
+    LS762:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS762.bam"
+        tumour_id: "LS762"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS762N.bam"
+        normal_id: "LS762N"
+        is_genome: False
+    LS843:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS843.bam"
+        tumour_id: "LS843"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS843N.bam"
+        normal_id: "LS843N"
+        is_genome: False
+    LS88:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS88.bam"
+        tumour_id: "LS88"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS88N.bam"
+        normal_id: "LS88N"
+        is_genome: False
+    LS951:
+        tumour_bam: "$$LOHR_PROJECT_HOME/data/LS951.bam"
+        tumour_id: "LS951"
+        normal_bam: "$$LOHR_PROJECT_HOME/data/LS951N.bam"
+        normal_id: "LS951N"
+        is_genome: False
+
+
+__TASK_SEQUENZA_BAM2SEQZ__:
+    reserved:
+        # do not change this section.
+        component_name: 'sequenza_bam2seqz'
+        component_version: 'v1.0.0'
+        seed_version: '2.1.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: '5G'
+        num_cpus: 2
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate: ("__SHARED__", "setup_env")
+    component:
+        input_files:
+            tumor: ("__SAMPLES__", "tumour_bam")
+            fasta: ("__SHARED__", "reference")
+            gc: ("__SHARED__", "gc_ref")
+            normal2: '__OPTIONAL__'
+            normal: ("__SAMPLES__", "normal_bam")
+        output_files:
+            output: '1-bam2seqz/$sample_id.seqz.gz'
+        parameters:
+            het: '__OPTIONAL__'
+            hom: '__OPTIONAL__'
+            qformat: '__OPTIONAL__'
+            'N': '__OPTIONAL__'
+            compress_seqz: True
+            qlimit: '__OPTIONAL__'
+            chromosome: ("__SHARED__", "chromosomes")
+
+
+__TASK_SEQUENZA_SEQZBINNING__:
+    reserved:
+        # do not change this section.
+        component_name: 'sequenza_seqzbinning'
+        component_version: 'v1.0.0'
+        seed_version: '2.1.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: '2G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate: ("__SHARED__", "setup_env")
+    component:
+        input_files:
+            seqz: ("__TASK_SEQUENZA_BAM2SEQZ__", "output")
+        output_files:
+            output: '1-bam2seqz/$sample_id.binned.seqz.gz'
+        parameters:
+            window: '50'
+            compress_seqz: True
+
+
+__TASK_SEQUENZA_ANALYSIS__:
+    reserved:
+        # do not change this section.
+        component_name: 'sequenza_analysis'
+        component_version: 'v1.0.0'
+        seed_version: '1.0.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: '5G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate: ("__SHARED__", "setup_env")
+    component:
+        input_files:
+            input: ("__TASK_SEQUENZA_SEQZBINNING__", "output")
+        output_files:
+            output: "2-R_analysis/"
+        parameters:
+            chr: '__OPTIONAL__'
+            min_reads: '__OPTIONAL__'
+            ploidy_limit: '__OPTIONAL__'
+            sample_id: '$sample_id'
+            max_cn: '__OPTIONAL__'
+            gender: '__OPTIONAL__'
+            min_normal_reads: '__OPTIONAL__'
+            cellularity_limit: '__OPTIONAL__'

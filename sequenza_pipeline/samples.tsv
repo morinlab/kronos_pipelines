@@ -1,0 +1,2 @@
+#sample_id	tumour_bam	normal_bam
+PT100	/data/tumour.bam	/data/normal.bam

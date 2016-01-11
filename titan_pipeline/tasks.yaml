@@ -1,0 +1,225 @@
+__TASK_MUTATIONSEQ__:
+    reserved:
+        # do not change this section
+        component_name: 'run_mutationseq'
+        component_version: '1.0.5'
+        seed_version: '4.3.7'
+    run:
+        use_cluster: True
+        memory: '10G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        boilerplate: ('__SHARED__', 'setup_env')
+        parallel_run: True
+        parallel_params: []
+        interval_file: ("__SHARED__", "mutationseq_intervals")
+    component:
+        input_files:
+            tumour: ('__SAMPLES__', 'tumour_bam')
+            reference: ('__SHARED__', 'reference')
+            positions_file: ('__SHARED__', 'positions_file')
+            normal: ('__SAMPLES__', 'normal_bam')
+            model: ('__SHARED__','model')
+            config: 'metadata.config'
+        output_files:
+            export_features: null
+            out: run_mutationseq/MutationSeq_SS.vcf
+            log_file: ../logs/mutationSeq_run.log
+        parameters:
+            all: False
+            features_only: False
+            verbose: True
+            manifest: '__OPTIONAL__'
+            interval: null
+            titan_mode: True
+            deep: False
+            no_filter: False
+            normalized: False
+            coverage: 4
+            threshold: 0.50
+            buffer_size: '2G'
+
+
+__TASK_CONVERT_VCF2COUNTS__:
+    reserved:
+        # do not change this section
+        component_name: 'convert_museq_vcf2counts'
+        component_version: '1.1.2'
+        seed_version: '1.1.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: '5G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        boilerplate: ('__SHARED__', 'setup_env')
+    component:
+        input_files:
+            infile: ('__TASK_MUTATIONSEQ__', 'out')
+            positions_file: null
+        output_files:
+            outfile: 'museq2counts/output_museq_postprocess.txt'
+        parameters:
+
+
+__TASK_READCOUNTER_TUMOUR__:
+    reserved:
+        # do not change this section
+        component_name: 'run_readcounter'
+        component_version: '1.1.2'
+        seed_version: '1.0.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: '5G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        boilerplate: ('__SHARED__', 'setup_env')
+    component:
+        input_files:
+            bam: ('__SAMPLES__', 'tumour_bam')
+        output_files:
+            out: 'run_readcounter/tumour.wig'
+        parameters:
+            q: '0'
+            w: '1000'
+            chromosomes: null
+            run_component: True
+
+
+__TASK_READCOUNTER_NORMAL__:
+    reserved:
+        # do not change this section
+        component_name: 'run_readcounter'
+        component_version: '1.1.2'
+        seed_version: '1.0.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: '5G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        boilerplate: ('__SHARED__', 'setup_env')
+    component:
+        input_files:
+            bam: ('__SAMPLES__', 'normal_bam')
+        output_files:
+            out: 'run_readcounter/normal.wig'
+        parameters:
+            q: '0'
+            w: '1000'
+            chromosomes: null
+            run_component: True
+
+
+__TASK_CALC_CORRECTREADS__:
+    reserved:
+        # do not change this section
+        component_name: 'calc_correctreads_wig'
+        component_version: '1.1.2'
+        seed_version: '0.1.1'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: '5G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+            R_LIBS: ('__SHARED__', 'r_libs')
+        boilerplate: ('__SHARED__', 'setup_env')
+    component:
+        input_files:
+            map: ('__SHARED__','map')
+            tumwig: ('__TASK_READCOUNTER_TUMOUR__', 'out')
+            gc: ('__SHARED__','gc')
+            normwig: ('__TASK_READCOUNTER_NORMAL__', 'out')
+            target_list: ('__SHARED__', 'target_list')
+        output_files:
+            outfile: 'calc_correctreads_wig/correct_reads.txt'
+        parameters:
+            id: $sample_id
+            hmmcopy: null
+            run_component: True
+            genome_type: ('__SHARED__','genome_type')
+
+
+__TASK_TITAN__:
+    reserved:
+        # do not change this section
+        component_name: 'run_titan'
+        component_version: '1.1.2'
+        seed_version: '0.1.1'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: '25G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+            R_LIBS: ('__SHARED__', 'r_libs')
+        boilerplate: ('__SHARED__', 'setup_env')
+        parallel_run: True
+        parallel_params: []
+        interval_file: ("__SHARED__", "titan_intervals")
+    component:
+        input_files:
+            map: ('__SHARED__', 'map')
+            infile: ('__TASK_CONVERT_VCF2COUNTS__', 'outfile')
+            cnfile: ('__TASK_CALC_CORRECTREADS__', 'outfile')
+        output_files:
+            outfile: 'results/${sample_id}_titan_outfile.txt'
+            obj_outfile: 'run_titan/titan_outfile_obj.RData'
+            outparam: 'results/${sample_id}_titan_outfile_params.txt'
+        parameters:
+            txn_z_strength: '1e6'
+            norm_est_meth: 'map'
+            pseudo_counts: '1e-300'
+            num_cores: '1'
+            n_zero: '0.5'
+            myskew: '0'
+            max_i: '50'
+            alpha_high: '20000'
+            bool_est_ploidy: 'TRUE'
+            sym: 'TRUE'
+            alpha_k: '2500'
+            txn_exp_len: '1e16'
+            num_clusters: "1"
+            ploidy: 2
+            maxcn: '8'
+            id: $sample_id
+            genome_type: ('__SHARED__','genome_type')
+            chromosomes: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y]
+            y_threshold: ('__SHARED__','y_threshold')
+
+
+__TASK_CALC_CNSEGMENTS__:
+    reserved:
+        # do not change this section
+        component_name: 'calc_cnsegments_titan'
+        component_version: '1.1.1'
+        seed_version: '0.1.2'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: '2G'
+        forced_dependencies: []
+        add_breakpoint: False
+        boilerplate: ('__SHARED__', 'setup_env')
+        parallel_run: True
+        parallel_params: ['infile']
+        interval_file: ("__SHARED__", "titan_intervals")
+    component:
+        input_files:
+            infile: ('__TASK_TITAN__', 'outfile')
+        output_files:
+            outigv: 'calc_cnsegments_titan/outigv.seg'
+            outfile: 'calc_cnsegments_titan/segs.txt'
+        parameters:
+            id: $sample_id
+            symmetric: "1"
