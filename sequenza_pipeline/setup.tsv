@@ -1,3 +1,4 @@
+#section	key	value
 __GENERAL__	python	/software/anaconda-2.3.0/bin/python
 __GENERAL__	sequenza-utils.py	/software/R-3.2.1/lib/R/library/sequenza/exec/sequenza-utils.py
 __GENERAL__	samtools	/software/samtools/1.2/iuc/package_samtools_1_2/6eea04363026/bin/samtools

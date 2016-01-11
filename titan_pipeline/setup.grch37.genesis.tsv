@@ -1,7 +1,7 @@
 #section	key	value
 __GENERAL__	python	/extscratch/morinlab/software/anaconda/2.3.0/envs/mutationseq-4.3.6/bin/python
 __GENERAL__	R	/extscratch/morinlab/software/R/3.2.0/bin/R
-__GENERAL__	mutationseq	/extscratch/morinlab/software/mutationseq-4.3.6/museq
+__GENERAL__	mutationseq	/extscratch/morinlab/software/mutationseq/4.3.6/museq
 __SHARED__	setup_env	. /extscratch/morinlab/software/env.sh
 __SHARED__	reference	/genesis/extscratch/morinlab/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Sequence/WholeGenomeFasta/GRCh37-lite.fa
 __SHARED__	positions_file	/genesis/extscratch/morinlab/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Annotation/Variation/common_all_dbSNP138.pos
