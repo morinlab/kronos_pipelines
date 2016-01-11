@@ -129,6 +129,7 @@ __TASK_CALC_CORRECTREADS__:
         num_cpus: 1
         forced_dependencies: []
         add_breakpoint: False
+        env_vars:
             R_LIBS: ('__SHARED__', 'r_libs')
         boilerplate: ('__SHARED__', 'setup_env')
     component:
@@ -160,6 +161,7 @@ __TASK_TITAN__:
         num_cpus: 1
         forced_dependencies: []
         add_breakpoint: False
+        env_vars:
             R_LIBS: ('__SHARED__', 'r_libs')
         boilerplate: ('__SHARED__', 'setup_env')
         parallel_run: True

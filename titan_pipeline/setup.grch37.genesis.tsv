@@ -1,3 +1,4 @@
+#section	key	value
 __GENERAL__	python	/extscratch/morinlab/software/anaconda/2.3.0/envs/mutationseq-4.3.6/bin/python
 __GENERAL__	R	/extscratch/morinlab/software/R/3.2.0/bin/R
 __GENERAL__	mutationseq	/extscratch/morinlab/software/mutationseq-4.3.6/museq
@@ -11,6 +12,6 @@ __SHARED__	y_threshold	20
 __SHARED__	target_list	/genesis/extscratch/morinlab/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Annotation/Exons/agilent_sureselect_all_exons_v5_and_utr.sort.merge.bed
 __SHARED__	genome_type	NCBI
 __SHARED__	model	model_single_v4.0.2.npz
-__SHARED__	mutationseq_intervals	mutationseq_intervals.grch37.txt
-__SHARED__	titan_intervals	titan_intervals.grch37.txt
+__SHARED__	mutationseq_intervals	/extscratch/morinlab/projects/cappseq_exome_lymphoma/software/pipelines/titan_pipeline/mutationseq_intervals.grch37.txt
+__SHARED__	titan_intervals	/extscratch/morinlab/projects/cappseq_exome_lymphoma/software/pipelines/titan_pipeline/titan_intervals.grch37.txt
 __SHARED__	chromosomes	[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y]
