@@ -24,7 +24,8 @@ __GENERAL__:
 
 
 __SHARED__:
-    reference: '/path/to/human_genome_reference'  # GATK-compatible
+    bwa_index_prefix: '/path/to/human_genome_reference'
+    gatk_reference: '/path/to/gatk_reference'
     use_cluster: True
 
 
@@ -122,7 +123,7 @@ __BWA_MEM__:
     component:
         input_files:
             input_dir: ("__BAM2FQ__", "outdir")
-            bwa_index_prefix: ('__SHARED__', 'input_ref')
+            bwa_index_prefix: ('__SHARED__', 'bwa_index_prefix')
         output_files:
             output_dir: "2-bwa_mem/"
 
@@ -358,7 +359,7 @@ __GATK_REALIGNER_TARGET_CREATOR__:
     component:
         input_files:
             input_file: ("__PICARD_MARK_DUPLICATES__", "OUTPUT")
-            reference_sequence: ("__SHARED__", "reference")
+            reference_sequence: ("__SHARED__", "gatk_reference")
         output_files:
             out: "7-gatk_realigner_target_creator/$sample_id.realigner_targets.txt"
         parameters:
@@ -401,7 +402,7 @@ __GATK_INDEL_REALIGNER__:
         input_files:
             input_file: ("__PICARD_MARK_DUPLICATES__", "OUTPUT")
             targetIntervals: ("__GATK_REALIGNER_TARGET_CREATOR__", "out")
-            reference_sequence: ("__SHARED__", "reference")
+            reference_sequence: ("__SHARED__", "gatk_reference")
         output_files:
             out: "8-gatk_indel_realigner/$sample_id.merge.rg.mdups.realn.bam"
         parameters:
