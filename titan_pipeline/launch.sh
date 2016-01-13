@@ -9,7 +9,7 @@ NAME="titan_pipeline"
         --job_scheduler "sge" \
         --components_dir "/extscratch/morinlab/software/pipeline_components_shahlab/cycle008.3" \
         --python_installation "/extscratch/morinlab/software/anaconda/2.3.0/envs/kronos-2.0.4/bin/python" \
-        --num_pipelines "50" \
-        --num_jobs "2500" \
+        --num_pipelines "10" \
+        --num_jobs "200" \
         --no_prefix \
         --qsub_options ' -pe ncpus {num_cpus} -l mem_free={mem} -l mem_token={mem} -l h_vmem={mem} -w n'
