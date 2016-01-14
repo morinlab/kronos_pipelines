@@ -1,4 +1,4 @@
-__MUTATIONSEQ__:
+__TASK_MUTATIONSEQ__:
     reserved:
         # do not change this section
         component_name: 'run_mutationseq'
@@ -41,7 +41,7 @@ __MUTATIONSEQ__:
             buffer_size: '2G'
 
 
-__READCOUNTER_TUMOUR__:
+__TASK_READCOUNTER_TUMOUR__:
     reserved:
         # do not change this section
         component_name: 'run_readcounter'
@@ -67,7 +67,7 @@ __READCOUNTER_TUMOUR__:
             run_component: True
 
 
-__READCOUNTER_NORMAL__:
+__TASK_READCOUNTER_NORMAL__:
     reserved:
         # do not change this section
         component_name: 'run_readcounter'
@@ -93,7 +93,7 @@ __READCOUNTER_NORMAL__:
             run_component: True
 
 
-__CALC_CORRECTREADS__:
+__TASK_CALC_CORRECTREADS__:
     reserved:
         # do not change this section
         component_name: 'calc_correctreads_wig'
@@ -112,9 +112,9 @@ __CALC_CORRECTREADS__:
     component:
         input_files:
             map: ('__SHARED__','map')
-            tumwig: ('__READCOUNTER_TUMOUR__', 'out')
+            tumwig: ('__TASK_READCOUNTER_TUMOUR__', 'out')
             gc: ('__SHARED__','gc')
-            normwig: ('__READCOUNTER_NORMAL__', 'out')
+            normwig: ('__TASK_READCOUNTER_NORMAL__', 'out')
             target_list: ('__SHARED__', 'target_list')
         output_files:
             outfile: '2-readcounter/$sample_id.read_counts.corrected.txt'
@@ -125,7 +125,7 @@ __CALC_CORRECTREADS__:
             genome_type: ('__SHARED__','genome_type')
 
 
-__CONVERT_VCF2COUNTS__:
+__TASK_CONVERT_VCF2COUNTS__:
     reserved:
         # do not change this section
         component_name: 'convert_museq_vcf2counts'
@@ -141,14 +141,14 @@ __CONVERT_VCF2COUNTS__:
         boilerplate:
     component:
         input_files:
-            infile: ('__MUTATIONSEQ__', 'out')
+            infile: ('__TASK_MUTATIONSEQ__', 'out')
             positions_file: null
         output_files:
             outfile: '1-mutationseq/$sample_id.snvs.counts.txt'
         parameters:
 
 
-__TITAN__:
+__TASK_TITAN__:
     reserved:
         # do not change this section
         component_name: 'run_titan'
@@ -170,8 +170,8 @@ __TITAN__:
     component:
         input_files:
             map: ('__SHARED__', 'map')
-            infile: ('__CONVERT_VCF2COUNTS__', 'outfile')
-            cnfile: ('__CALC_CORRECTREADS__', 'outfile')
+            infile: ('__TASK_CONVERT_VCF2COUNTS__', 'outfile')
+            cnfile: ('__TASK_CALC_CORRECTREADS__', 'outfile')
         output_files:
             outfile: '3-titan/$sample_id.titan.results.txt'
             obj_outfile: '3-titan/$sample_id.titan.results.RData'
@@ -198,7 +198,7 @@ __TITAN__:
             y_threshold: ('__SHARED__','y_threshold')
 
 
-__CALC_CNSEGMENTS__:
+__TASK_CALC_CNSEGMENTS__:
     reserved:
         # do not change this section
         component_name: 'calc_cnsegments_titan'
@@ -211,12 +211,14 @@ __CALC_CNSEGMENTS__:
         forced_dependencies: []
         add_breakpoint: False
         boilerplate:
+        env_vars:
+            R_LIBS: ('__SHARED__', 'r_libs')
         parallel_run: True
         parallel_params: ['infile']
         interval_file: ("__SHARED__", "titan_intervals")
     component:
         input_files:
-            infile: ('__TITAN__', 'outfile')
+            infile: ('__TASK_TITAN__', 'outfile')
         output_files:
             outigv: '3-titan/$sample_id.titan.igv.seg'
             outfile: '3-titan/$sample_id.titan.segments.txt'
@@ -225,7 +227,7 @@ __CALC_CNSEGMENTS__:
             symmetric: "1"
 
 
-__CALC_OPTIMAL_CLUSTER__:
+__TASK_CALC_OPTIMAL_CLUSTER__:
     reserved:
         # do not change this section
         component_name: 'calc_optimal_clusters_titan'
@@ -233,9 +235,9 @@ __CALC_OPTIMAL_CLUSTER__:
         seed_version: '1.0.0'
     run:
         # NOTE: component cannot run in parallel mode.
-        use_cluster: False
+        use_cluster: True
         memory: '1G'
-        forced_dependencies: ['__TITAN__']
+        forced_dependencies: ['__TASK_TITAN__']
         add_breakpoint: False
         boilerplate: null
         parallel_run: False
@@ -250,7 +252,7 @@ __CALC_OPTIMAL_CLUSTER__:
             sample_id: '${sample_id}'
 
 
-__PLOT_TITAN__:
+__TASK_PLOT_TITAN__:
     reserved:
         # do not change this section
         component_name: 'plot_titan'
@@ -258,17 +260,19 @@ __PLOT_TITAN__:
         seed_version: '0.1.1'
     run:
         # NOTE: component cannot run in parallel mode.
-        use_cluster: False
+        use_cluster: True
         memory: '5G'
         forced_dependencies: []
         add_breakpoint: False
         boilerplate: null
+        env_vars:
+            R_LIBS: ('__SHARED__', 'r_libs')
         parallel_run: True
         parallel_params: ['obj_file']
         interval_file: ("__SHARED__", "titan_intervals")
     component:
         input_files:
-            obj_file: ('__TITAN__', 'obj_outfile')
+            obj_file: ('__TASK_TITAN__', 'obj_outfile')
         output_files:
             outdir: "3-titan/${sample_id}_titan_plots/"
         parameters:
