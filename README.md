@@ -28,7 +28,7 @@ Here's a quick guide on how to launch your own pipeline.
 4. Update the `launch.sh` file, if need be. 
 
 	1. If you need to use a later version of the pipeline components, update `--components_dir` accordingly
-	2. If you are using an environment other than Genesis, you need to update `--setup_file` accordingly. There might be another setup file in the repository that you could use. Otherwise, you'll have to create one. Consider adding it to the repository so that others can benefit from it. 
+	2. If you are using an environment other than Genesis, you need to update `--setup_file` accordingly. There might be another setup file in the repository that you could use. Otherwise, you'll have to create one. Consider adding it to the repository so that others can benefit from it. If you want help, open an issue on GitHub. 
 
 5. Launch your pipeline! **Hint:** use `screen` so that the pipeline continues running after you close your terminal. If you disconnect from `screen`, you can reconnect by running `screen -r`. 
 
