@@ -10,7 +10,7 @@ __MUTATIONSEQ__:
         num_cpus: 1
         forced_dependencies: []
         add_breakpoint: False
-        boilerplate: ('__SHARED__', 'setup_env')
+        boilerplate:
         parallel_run: True
         parallel_params: []
         interval_file: ("__SHARED__", "mutationseq_intervals")
@@ -54,7 +54,7 @@ __READCOUNTER_TUMOUR__:
         num_cpus: 1
         forced_dependencies: []
         add_breakpoint: False
-        boilerplate: ('__SHARED__', 'setup_env')
+        boilerplate:
     component:
         input_files:
             bam: ('__SAMPLES__', 'tumour_bam')
@@ -80,7 +80,7 @@ __READCOUNTER_NORMAL__:
         num_cpus: 1
         forced_dependencies: []
         add_breakpoint: False
-        boilerplate: ('__SHARED__', 'setup_env')
+        boilerplate:
     component:
         input_files:
             bam: ('__SAMPLES__', 'normal_bam')
@@ -108,7 +108,7 @@ __CALC_CORRECTREADS__:
         add_breakpoint: False
         env_vars:
             R_LIBS: ('__SHARED__', 'r_libs')
-        boilerplate: ('__SHARED__', 'setup_env')
+        boilerplate:
     component:
         input_files:
             map: ('__SHARED__','map')
@@ -138,7 +138,7 @@ __CONVERT_VCF2COUNTS__:
         num_cpus: 1
         forced_dependencies: []
         add_breakpoint: False
-        boilerplate: ('__SHARED__', 'setup_env')
+        boilerplate:
     component:
         input_files:
             infile: ('__MUTATIONSEQ__', 'out')
@@ -163,7 +163,7 @@ __TITAN__:
         add_breakpoint: False
         env_vars:
             R_LIBS: ('__SHARED__', 'r_libs')
-        boilerplate: ('__SHARED__', 'setup_env')
+        boilerplate:
         parallel_run: True
         parallel_params: []
         interval_file: ("__SHARED__", "titan_intervals")
@@ -210,7 +210,7 @@ __CALC_CNSEGMENTS__:
         memory: '2G'
         forced_dependencies: []
         add_breakpoint: False
-        boilerplate: ('__SHARED__', 'setup_env')
+        boilerplate:
         parallel_run: True
         parallel_params: ['infile']
         interval_file: ("__SHARED__", "titan_intervals")
