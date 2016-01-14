@@ -1,0 +1,9 @@
+#section	key	value
+__GENERAL__	python	/extscratch/morinlab/software/anaconda/2.3.0/bin/python
+__GENERAL__	sequenza-utils.py	/extscratch/morinlab/software/sequenza/7cca15e/exec/sequenza-utils.py
+__GENERAL__	samtools	/extscratch/morinlab/software/samtools/1.2/bin/samtools
+__GENERAL__	Rscript	/extscratch/morinlab/software/R/3.2.0/bin/Rscript
+__GENERAL__	sequenza_analysis.R	/extscratch/morinlab/software/lab_scripts/8.1/generate_sequenza_output/sequenza_analysis.R
+__SHARED__	reference	/extscratch/morinlab/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Sequence/WholeGenomeFasta/GRCh37-lite.fa
+__SHARED__	gc_ref	/extscratch/morinlab/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Annotation/GC_Content/GRCh37-lite.gc50Base.txt.gz
+__SHARED__	chromosomes	1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X

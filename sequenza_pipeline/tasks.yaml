@@ -12,7 +12,7 @@ __TASK_SEQUENZA_BAM2SEQZ__:
         forced_dependencies: []
         add_breakpoint: False
         env_vars:
-        boilerplate: ("__SHARED__", "setup_env")
+        boilerplate:
     component:
         input_files:
             tumor: ("__SAMPLES__", "tumour_bam")
@@ -46,7 +46,7 @@ __TASK_SEQUENZA_SEQZBINNING__:
         forced_dependencies: []
         add_breakpoint: False
         env_vars:
-        boilerplate: ("__SHARED__", "setup_env")
+        boilerplate:
     component:
         input_files:
             seqz: ("__TASK_SEQUENZA_BAM2SEQZ__", "output")
@@ -71,7 +71,7 @@ __TASK_SEQUENZA_ANALYSIS__:
         forced_dependencies: []
         add_breakpoint: False
         env_vars:
-        boilerplate: ("__SHARED__", "setup_env")
+        boilerplate:
     component:
         input_files:
             input: ("__TASK_SEQUENZA_SEQZBINNING__", "output")
