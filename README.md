@@ -19,7 +19,11 @@ Here's a quick guide on how to launch your own pipeline.
 	cp /extscratch/morinlab/software/pipelines_morinlab/3.0/titan_pipeline/{samples.tsv,launch.sh} .
 	```
 	
-3. Add your sample information to the `samples.tsv file. Don't forget to use tabs to separate your columns.
+3. Add your sample information to the `samples.tsv` file. 
+
+	1. Don't forget to use tabs to separate your columns.
+	2. Add all of your samples to your `samples.tsv` file. 
+	3. Include the header line. 
 
 4. Update the `launch.sh` file, if need be. 
 
