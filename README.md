@@ -38,3 +38,11 @@ Here's a quick guide on how to launch your own pipeline.
 	# You might have to click Enter after running screen.
 	sh launch.sh
 	```
+
+6. **Bonus:** If your pipeline fails at any point, you may perform any required fixes and relaunch it such that it resumes where it left off. All you need to do is add the run ID (_e.g._ 2016-01-14_17-07-35) in `launch.sh` using the `--run_id` argument. **Note:** Don't forget the trailing backslash on the previous line. 
+
+	```bash
+	[...]
+	--qsub_options ' -pe ncpus {num_cpus} -l mem_free={mem} -l mem_token={mem} -l h_vmem={mem} -w n' \
+	--run_id "2016-01-14_17-07-35"
+	```
