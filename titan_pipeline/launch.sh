@@ -1,5 +1,5 @@
 NAME="titan_pipeline"
-VERSION="3.1"
+VERSION="3.6"
 /extscratch/morinlab/software/anaconda/2.3.0/envs/kronos-2.0.4/bin/kronos \
     run \
         --working_dir . \

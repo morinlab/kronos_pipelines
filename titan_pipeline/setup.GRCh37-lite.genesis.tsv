@@ -3,13 +3,13 @@ __GENERAL__	python	/extscratch/morinlab/software/anaconda/2.3.0/envs/mutationseq
 __GENERAL__	R	/gsc/software/linux-x86_64-centos5/R-3.1.1/bin/R
 __GENERAL__	mutationseq	/extscratch/morinlab/software/mutationseq/4.3.6/museq
 __SHARED__	setup_env	. /extscratch/morinlab/software/env.sh
-__SHARED__	reference	/genesis/extscratch/morinlab/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Sequence/WholeGenomeFasta/GRCh37-lite.fa
-__SHARED__	positions_file	/genesis/extscratch/morinlab/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Annotation/Variation/common_all_dbSNP138.pos
-__SHARED__	map	/genesis/extscratch/morinlab/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Annotation/Mappability/GRCh37-lite.map.ws_1000.wig
-__SHARED__	gc	/genesis/extscratch/morinlab/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Annotation/GC_Content/GRCh37-lite.gc.ws_1000.wig
+__SHARED__	reference	/extscratch/morinlab/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Sequence/WholeGenomeFasta/GRCh37-lite.fa
+__SHARED__	positions_file	/extscratch/morinlab/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Annotation/Variation/common_all_dbSNP138.pos
+__SHARED__	map	/extscratch/morinlab/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Annotation/Mappability/GRCh37-lite.map.ws_1000.wig
+__SHARED__	gc	/extscratch/morinlab/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Annotation/GC_Content/GRCh37-lite.gc.ws_1000.wig
 __SHARED__	r_libs	/extscratch/morinlab/software/R_libs
 __SHARED__	y_threshold	20
-__SHARED__	target_list	/genesis/extscratch/morinlab/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Annotation/Exons/agilent_sureselect_all_exons_v5_and_utr.sort.merge.bed
+__SHARED__	target_list	/extscratch/morinlab/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Annotation/Exons/agilent_sureselect_all_exons_v5_and_utr.sort.merge.bed
 __SHARED__	genome_type	NCBI
 __SHARED__	model	model_single_v4.0.2.npz
 __SHARED__	mutationseq_intervals	/extscratch/morinlab/projects/cappseq_exome_lymphoma/software/pipelines/titan_pipeline/mutationseq_intervals.GRCh37-lite.txt

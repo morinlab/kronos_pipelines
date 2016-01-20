@@ -10,7 +10,7 @@ __TASK_MUTATIONSEQ__:
         num_cpus: 1
         forced_dependencies: []
         add_breakpoint: False
-        boilerplate:
+        boilerplate: ("__SHARED__", "setup_env")
         parallel_run: True
         parallel_params: []
         interval_file: ("__SHARED__", "mutationseq_intervals")
@@ -54,7 +54,7 @@ __TASK_READCOUNTER_TUMOUR__:
         num_cpus: 1
         forced_dependencies: []
         add_breakpoint: False
-        boilerplate:
+        boilerplate: ("__SHARED__", "setup_env")
     component:
         input_files:
             bam: ('__SAMPLES__', 'tumour_bam')
@@ -80,7 +80,7 @@ __TASK_READCOUNTER_NORMAL__:
         num_cpus: 1
         forced_dependencies: []
         add_breakpoint: False
-        boilerplate:
+        boilerplate: ("__SHARED__", "setup_env")
     component:
         input_files:
             bam: ('__SAMPLES__', 'normal_bam')
@@ -108,7 +108,7 @@ __TASK_CALC_CORRECTREADS__:
         add_breakpoint: False
         env_vars:
             R_LIBS: ('__SHARED__', 'r_libs')
-        boilerplate:
+        boilerplate: ("__SHARED__", "setup_env")
     component:
         input_files:
             map: ('__SHARED__','map')
@@ -138,7 +138,7 @@ __TASK_CONVERT_VCF2COUNTS__:
         num_cpus: 1
         forced_dependencies: []
         add_breakpoint: False
-        boilerplate:
+        boilerplate: ("__SHARED__", "setup_env")
     component:
         input_files:
             infile: ('__TASK_MUTATIONSEQ__', 'out')
@@ -163,7 +163,7 @@ __TASK_TITAN__:
         add_breakpoint: False
         env_vars:
             R_LIBS: ('__SHARED__', 'r_libs')
-        boilerplate:
+        boilerplate: ("__SHARED__", "setup_env")
         parallel_run: True
         parallel_params: []
         interval_file: ("__SHARED__", "titan_intervals")
@@ -210,7 +210,7 @@ __TASK_CALC_CNSEGMENTS__:
         memory: '2G'
         forced_dependencies: []
         add_breakpoint: False
-        boilerplate:
+        boilerplate: ("__SHARED__", "setup_env")
         env_vars:
             R_LIBS: ('__SHARED__', 'r_libs')
         parallel_run: True
@@ -239,7 +239,7 @@ __TASK_CALC_OPTIMAL_CLUSTER__:
         memory: '1G'
         forced_dependencies: ['__TASK_TITAN__']
         add_breakpoint: False
-        boilerplate: null
+        boilerplate: ("__SHARED__", "setup_env")
         parallel_run: False
         parallel_params: null
         interval_file: null
@@ -264,7 +264,7 @@ __TASK_PLOT_TITAN__:
         memory: '5G'
         forced_dependencies: []
         add_breakpoint: False
-        boilerplate: null
+        boilerplate: ("__SHARED__", "setup_env")
         env_vars:
             R_LIBS: ('__SHARED__', 'r_libs')
         parallel_run: True
