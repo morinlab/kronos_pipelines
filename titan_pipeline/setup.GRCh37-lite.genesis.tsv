@@ -2,6 +2,7 @@
 __GENERAL__	python	/extscratch/morinlab/software/anaconda/2.3.0/envs/mutationseq-4.3.6/bin/python
 __GENERAL__	R	/gsc/software/linux-x86_64-centos5/R-3.1.1/bin/R
 __GENERAL__	mutationseq	/extscratch/morinlab/software/mutationseq/4.3.6/museq
+__GENERAL__	perl	/genesis/extscratch/morinlab/software/perlbrew/0.73/perls/perl-5.22.0/bin/perl
 __SHARED__	setup_env	. /extscratch/morinlab/software/env.sh
 __SHARED__	reference	/extscratch/morinlab/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Sequence/WholeGenomeFasta/GRCh37-lite.fa
 __SHARED__	positions_file	/extscratch/morinlab/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Annotation/Variation/common_all_dbSNP138.pos
