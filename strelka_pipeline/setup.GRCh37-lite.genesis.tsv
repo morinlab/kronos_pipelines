@@ -7,6 +7,7 @@ __GENERAL__	make	/usr/bin/make
 __GENERAL__	python	/extscratch/morinlab/software/anaconda/2.3.0/bin/python
 __GENERAL__	vcf2maf.pl	/extscratch/morinlab/software/vcf2maf/1.6.2/vcf2maf.pl
 __SHARED__	reference	/extscratch/morinlab/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Sequence/WholeGenomeFasta/GRCh37-lite.fa
+__SHARED__	strelka_config	/extscratch/morinlab/software/strelka_workflow/1.0.14/etc/strelka_config_bwa_default.ini
 __SHARED__	vep_path	/extscratch/morinlab/software/ensembl-tools-release/81/scripts/variant_effect_predictor/
 __SHARED__	vep_data_dir	/extscratch/morinlab/reference/ensembl_vep_cache
 __SHARED__	vep_mem	8G

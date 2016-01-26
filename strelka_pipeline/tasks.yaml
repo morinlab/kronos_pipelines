@@ -108,13 +108,13 @@ __TASK_STRELKA__:
             reference: ("__SHARED__", "reference")
             normal_bam: ("__TASK_CLIPOVERLAP_NORMAL__", "output_file")
             tumour_bam: ("__TASK_CLIPOVERLAP_TUMOUR__", "output_file")
+            config_file: ("__SHARED__", "strelka_config")
         output_files:
             passed_snvs_vcf: "2-strelka/$sample_id.strelka_passed_snvs.vcf"
             output_dir: "2-strelka/strelka_output"
             passed_indels_vcf: "2-strelka/$sample_id.strelka_passed_indels.vcf"
         parameters:
             num_threads: 12
-            is_genome: ("__SAMPLES__", "is_genome")
 
 
 __TASK_DELETE_CLIPPED_BAMS__:
