@@ -11,4 +11,4 @@ __SHARED__	vep_path	/extscratch/morinlab/software/ensembl-tools-release/81/scrip
 __SHARED__	vep_data_dir	/extscratch/morinlab/reference/ensembl_vep_cache
 __SHARED__	vep_mem	8G
 __SHARED__	vep_threads	2
-__SHARED__	setup_env	. /extscratch/morinlab/env.sh
+__SHARED__	setup_env	. /extscratch/morinlab/software/env.sh
