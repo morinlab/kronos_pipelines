@@ -98,7 +98,7 @@ __TASK_STRELKA__:
         # NOTE: component cannot run in parallel mode.
         use_cluster: True
         memory: '10G'
-        num_cpus: 1
+        num_cpus: 12
         forced_dependencies: ["__TASK_SAMTOOLS_INDEX_TUMOUR__", "__TASK_SAMTOOLS_INDEX_NORMAL__"]
         add_breakpoint: False
         env_vars:
@@ -113,58 +113,8 @@ __TASK_STRELKA__:
             output_dir: "2-strelka/strelka_output"
             passed_indels_vcf: "2-strelka/$sample_id.strelka_passed_indels.vcf"
         parameters:
-            num_threads: 1
+            num_threads: 12
             is_genome: ("__SAMPLES__", "is_genome")
-
-
-__TASK_MUTATIONSEQ__:
-    reserved:
-        # do not change this section.
-        component_name: 'run_mutationseq'
-        component_version: '1.0.8'
-        seed_version: 'NA'
-    run:
-        use_cluster: True
-        memory: '10G'
-        forced_dependencies: ["__TASK_SAMTOOLS_INDEX_TUMOUR__", "__TASK_SAMTOOLS_INDEX_NORMAL__"]
-        add_breakpoint: False
-        env_vars:
-        boilerplate: ("__SHARED__", "setup_env")
-        parallel_run: False
-        parallel_params: []
-        interval_file:
-    component:
-        input_files:
-            tumour: ("__TASK_CLIPOVERLAP_TUMOUR__", "output_file")
-            reference: ('__SHARED__','reference')
-            positions_file: null
-            normal: ("__TASK_CLIPOVERLAP_NORMAL__", "output_file")
-            model: ('__SHARED__','model')
-            config: 'metadata.config'
-        output_files:
-            export_features: null
-            out: '3-mutationseq/$sample_id.snvs.museq.vcf'
-            log_file: '../logs/mutationSeq_run.log'
-        parameters:
-            all: '__FLAG__'
-            features_only: '__FLAG__'
-            verbose: True
-            manifest: null
-            indl_threshold: 0.05
-            normal_variant: 25
-            interval: null
-            titan_mode: '__FLAG__'
-            deep: '__FLAG__'
-            no_filter: '__FLAG__'
-            tumour_variant: 2
-            single: None
-            normalized: '__FLAG__'
-            coverage: 4
-            threshold: 0.5
-            buffer_size: '2G'
-            baseq_threshold: 10
-            mapq_threshold: 20
-            purity: 70
 
 
 __TASK_DELETE_CLIPPED_BAMS__:
@@ -178,7 +128,7 @@ __TASK_DELETE_CLIPPED_BAMS__:
         use_cluster: False
         memory: '1G'
         num_cpus: 1
-        forced_dependencies: ["__TASK_STRELKA__", "__TASK_MUTATIONSEQ__"]
+        forced_dependencies: ["__TASK_STRELKA__"]
         add_breakpoint: False
         env_vars:
         boilerplate: ("__SHARED__", "setup_env")
@@ -252,42 +202,6 @@ __TASK_VCF2MAF_INDELS__:
             vep_path: ("__SHARED__", "vep_path")
         output_files:
             output_maf: "4-vcf2maf/$sample_id.indels.passed.maf"
-        parameters:
-            min_hom_vaf: '__OPTIONAL__'
-            ncbi_build: 'GRCh37'
-            maf_center: '__OPTIONAL__'
-            vcf_tumor_id: 'TUMOR'
-            vep_forks: ("__SHARED__", "vep_threads")
-            tumor_id: ("__SAMPLES__", "tumour_id")
-            normal_id: ("__SAMPLES__", "normal_id")
-            species: 'homo_sapiens'
-            vcf_normal_id: 'NORMAL'
-
-
-__TASK_VCF2MAF_SNVS_MUTATIONSEQ__:
-    reserved:
-        # do not change this section.
-        component_name: 'vcf2maf_1_6_2'
-        component_version: 'v1.0.0'
-        seed_version: '1.6.2'
-    run:
-        # NOTE: component cannot run in parallel mode.
-        use_cluster: True
-        memory: 20G
-        num_cpus: 1
-        forced_dependencies: []
-        add_breakpoint: False
-        env_vars:
-        boilerplate: ("__SHARED__", "setup_env")
-    component:
-        input_files:
-            vep_data: ("__SHARED__", "vep_data_dir")
-            custom_enst: '__OPTIONAL__'
-            ref_fasta: ("__SHARED__", "reference")
-            input_vcf: ("__TASK_MUTATIONSEQ__", "out")
-            vep_path: ("__SHARED__", "vep_path")
-        output_files:
-            output_maf: "4-vcf2maf/$sample_id.snvs.museq.maf"
         parameters:
             min_hom_vaf: '__OPTIONAL__'
             ncbi_build: 'GRCh37'
