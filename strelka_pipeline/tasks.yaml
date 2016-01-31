@@ -210,5 +210,5 @@ __TASK_VCF2MAF_INDELS__:
             vep_forks: ("__SHARED__", "vep_threads")
             tumor_id: ("__SAMPLES__", "tumour_id")
             normal_id: ("__SAMPLES__", "normal_id")
-            species: 'homo_sapiens'
+            species: ("__SHARED__", "vep_species")
             vcf_normal_id: 'NORMAL'
