@@ -168,13 +168,13 @@ __TASK_VCF2MAF_SNVS__:
             output_maf: "3-vcf2maf/$sample_id.snvs.passed.maf"
         parameters:
             min_hom_vaf: '__OPTIONAL__'
-            ncbi_build: 'GRCh37'
+            ncbi_build: ("__SHARED__", "vep_ncbi_build")
             maf_center: '__OPTIONAL__'
             vcf_tumor_id: 'TUMOR'
             vep_forks: ("__SHARED__", "vep_threads")
             tumor_id: ("__SAMPLES__", "tumour_id")
             normal_id: ("__SAMPLES__", "normal_id")
-            species: 'homo_sapiens'
+            species: ("__SHARED__", "vep_species")
             vcf_normal_id: 'NORMAL'
 
 
@@ -204,7 +204,7 @@ __TASK_VCF2MAF_INDELS__:
             output_maf: "3-vcf2maf/$sample_id.indels.passed.maf"
         parameters:
             min_hom_vaf: '__OPTIONAL__'
-            ncbi_build: 'GRCh37'
+            ncbi_build: ("__SHARED__", "vep_ncbi_build")
             maf_center: '__OPTIONAL__'
             vcf_tumor_id: 'TUMOR'
             vep_forks: ("__SHARED__", "vep_threads")

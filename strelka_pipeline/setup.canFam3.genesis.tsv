@@ -6,12 +6,12 @@ __GENERAL__	configureStrelkaWorkflow.pl	/extscratch/morinlab/software/strelka_wo
 __GENERAL__	make	/usr/bin/make
 __GENERAL__	python	/extscratch/morinlab/software/anaconda/2.3.0/bin/python
 __GENERAL__	vcf2maf.pl	/extscratch/morinlab/software/vcf2maf/1.6.2/vcf2maf.pl
-__SHARED__	reference	/extscratch/morinlab/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Sequence/WholeGenomeFasta/GRCh37-lite.fa
+__SHARED__	reference	/extscratch/morinlab/reference/igenomes/Canis_familiaris/UCSC/canFam3/Sequence/WholeGenomeFasta/canFam3.fa
 __SHARED__	strelka_config	/extscratch/morinlab/software/strelka_workflow/1.0.14/etc/strelka_config_bwa_default.ini
 __SHARED__	vep_path	/extscratch/morinlab/software/ensembl-tools-release/81/scripts/variant_effect_predictor/
 __SHARED__	vep_data_dir	/extscratch/morinlab/reference/ensembl_vep_cache
-__SHARED__	vep_species	homo_sapiens
-__SHARED__	vep_ncbi_build	GRCh37
+__SHARED__	vep_species	canis_familiaris
+__SHARED__	vep_ncbi_build	CanFam3.1
 __SHARED__	vep_mem	8G
 __SHARED__	vep_threads	2
 __SHARED__	setup_env	. /extscratch/morinlab/software/env.sh
