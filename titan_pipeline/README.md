@@ -15,5 +15,5 @@ This causes problems when components such as `run_titan` expect a list but
 receive a string. For now, the list is hard-coded in the `tasks.yaml` file. 
 See: https://www.bcgsc.ca/jira/browse/PFD-552. 
 
-4. This pipeline is setup for exomes. If you need to run the pipeline on 
-genomes, open an issue on GitHub and we'll deal with it then.  
+4. By default, this pipeline is meant for exomes. If you wish to run 
+it on genomes, you have to set `target_list` in the setup file to `null`. 
