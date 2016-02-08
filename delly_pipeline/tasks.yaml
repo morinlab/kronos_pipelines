@@ -1,0 +1,245 @@
+__TASK_DELLY_DEL__:
+    reserved:
+        # do not change this section.
+        component_name: 'delly'
+        component_version: 'v1.0.0'
+        seed_version: 'v0.6.3'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: '7G'
+        num_cpus: ("__SHARED__", "num_delly_threads")
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate: ("__SHARED__", "setup_env")
+    component:
+        input_files:
+            tumour_bam: ("__SAMPLES__", "tumour_bam")
+            normal_bam: ("__SAMPLES__", "normal_bam")
+        output_files:
+            vcf_file: "1-delly/$sample_id.DEL.vcf"
+        parameters:
+            reference_fasta: ("__SHARED__", "reference_fasta")
+            num_delly_threads: ("__SHARED__", "num_delly_threads")
+            vcfgeno: '__OPTIONAL__'
+            excluded_regions: ("__SHARED__", "excluded_regions")
+            sv_type: 'DEL'
+            geno_qual: '__OPTIONAL__'
+            map_qual: '__OPTIONAL__'
+            min_flank: '__OPTIONAL__'
+            mad_cutoff: '__OPTIONAL__'
+
+
+__TASK_DELLY_DEL_SOMATIC_FILTER__:
+    reserved:
+        # do not change this section.
+        component_name: 'delly_somatic_filter'
+        component_version: 'v1.0.0'
+        seed_version: '1.0.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate: ("__SHARED__", "setup_env")
+    component:
+        input_files:
+            vcfFile: ("__TASK_DELLY_DEL__", "vcf_file")
+        output_files:
+            outFile: "2-delly-somatic/$sample_id.DEL.somatic.vcf"
+        parameters:
+            siteFilter: False
+            minSize: 400
+            svType: ("__TASK_DELLY_DEL__", "sv_type")
+            maxSize: '__OPTIONAL__'
+            ratioGeno: 0.75
+            altAF: 0.1
+
+__TASK_DELLY_DUP__:
+    reserved:
+        # do not change this section.
+        component_name: 'delly'
+        component_version: 'v1.0.0'
+        seed_version: 'v0.6.3'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: '4G'
+        num_cpus: ("__SHARED__", "num_delly_threads")
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate: ("__SHARED__", "setup_env")
+    component:
+        input_files:
+            tumour_bam: ("__SAMPLES__", "tumour_bam")
+            normal_bam: ("__SAMPLES__", "normal_bam")
+        output_files:
+            vcf_file: "1-delly/$sample_id.DUP.vcf"
+        parameters:
+            reference_fasta: ("__SHARED__", "reference_fasta")
+            num_delly_threads: ("__SHARED__", "num_delly_threads")
+            vcfgeno: '__OPTIONAL__'
+            excluded_regions: ("__SHARED__", "excluded_regions")
+            sv_type: 'DUP'
+            geno_qual: '__OPTIONAL__'
+            map_qual: '__OPTIONAL__'
+            min_flank: '__OPTIONAL__'
+            mad_cutoff: '__OPTIONAL__'
+
+
+__TASK_DELLY_DUP_SOMATIC_FILTER__:
+    reserved:
+        # do not change this section.
+        component_name: 'delly_somatic_filter'
+        component_version: 'v1.0.0'
+        seed_version: '1.0.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate: ("__SHARED__", "setup_env")
+    component:
+        input_files:
+            vcfFile: ("__TASK_DELLY_DUP__", "vcf_file")
+        output_files:
+            outFile: "2-delly-somatic/$sample_id.DUP.somatic.vcf"
+        parameters:
+            siteFilter: False
+            minSize: 400
+            svType: ("__TASK_DELLY_DUP__", "sv_type")
+            maxSize: '__OPTIONAL__'
+            ratioGeno: 0.75
+            altAF: 0.1
+
+
+__TASK_DELLY_INV__:
+    reserved:
+        # do not change this section.
+        component_name: 'delly'
+        component_version: 'v1.0.0'
+        seed_version: 'v0.6.3'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: '4G'
+        num_cpus: ("__SHARED__", "num_delly_threads")
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate: ("__SHARED__", "setup_env")
+    component:
+        input_files:
+            tumour_bam: ("__SAMPLES__", "tumour_bam")
+            normal_bam: ("__SAMPLES__", "normal_bam")
+        output_files:
+            vcf_file: "1-delly/$sample_id.INV.vcf"
+        parameters:
+            reference_fasta: ("__SHARED__", "reference_fasta")
+            num_delly_threads: ("__SHARED__", "num_delly_threads")
+            vcfgeno: '__OPTIONAL__'
+            excluded_regions: ("__SHARED__", "excluded_regions")
+            sv_type: 'INV'
+            geno_qual: '__OPTIONAL__'
+            map_qual: '__OPTIONAL__'
+            min_flank: '__OPTIONAL__'
+            mad_cutoff: '__OPTIONAL__'
+
+
+__TASK_DELLY_INV_SOMATIC_FILTER__:
+    reserved:
+        # do not change this section.
+        component_name: 'delly_somatic_filter'
+        component_version: 'v1.0.0'
+        seed_version: '1.0.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate: ("__SHARED__", "setup_env")
+    component:
+        input_files:
+            vcfFile: ("__TASK_DELLY_INV__", "vcf_file")
+        output_files:
+            outFile: "2-delly-somatic/$sample_id.INV.somatic.vcf"
+        parameters:
+            siteFilter: False
+            minSize: 400
+            svType: ("__TASK_DELLY_INV__", "sv_type")
+            maxSize: '__OPTIONAL__'
+            ratioGeno: 0.75
+            altAF: 0.1
+
+
+__TASK_DELLY_TRA__:
+    reserved:
+        # do not change this section.
+        component_name: 'delly'
+        component_version: 'v1.0.0'
+        seed_version: 'v0.6.3'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: '7G'
+        num_cpus: ("__SHARED__", "num_delly_threads")
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate: ("__SHARED__", "setup_env")
+    component:
+        input_files:
+            tumour_bam: ("__SAMPLES__", "tumour_bam")
+            normal_bam: ("__SAMPLES__", "normal_bam")
+        output_files:
+            vcf_file: "1-delly/$sample_id.TRA.vcf"
+        parameters:
+            reference_fasta: ("__SHARED__", "reference_fasta")
+            num_delly_threads: ("__SHARED__", "num_delly_threads")
+            vcfgeno: '__OPTIONAL__'
+            excluded_regions: ("__SHARED__", "excluded_regions")
+            sv_type: 'TRA'
+            geno_qual: '__OPTIONAL__'
+            map_qual: '__OPTIONAL__'
+            min_flank: '__OPTIONAL__'
+            mad_cutoff: '__OPTIONAL__'
+
+
+__TASK_DELLY_TRA_SOMATIC_FILTER__:
+    reserved:
+        # do not change this section.
+        component_name: 'delly_somatic_filter'
+        component_version: 'v1.0.0'
+        seed_version: '1.0.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate: ("__SHARED__", "setup_env")
+    component:
+        input_files:
+            vcfFile: ("__TASK_DELLY_TRA__", "vcf_file")
+        output_files:
+            outFile: "2-delly-somatic/$sample_id.TRA.somatic.vcf"
+        parameters:
+            siteFilter: False
+            minSize: 0
+            svType: ("__TASK_DELLY_TRA__", "sv_type")
+            maxSize: '__OPTIONAL__'
+            ratioGeno: 0.75
+            altAF: 0.1
