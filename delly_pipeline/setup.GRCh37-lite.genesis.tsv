@@ -1,0 +1,7 @@
+__GENERAL__	delly	/extscratch/morinlab/software/delly/0.6.3/bin/delly
+__GENERAL__	python	/extscratch/morinlab/software/anaconda/2.3.0/envs/delly_somaticFilter/bin/python
+__GENERAL__	somaticFilter.py	/extscratch/morinlab/software/delly/0.6.3/variantFiltering/somaticFilter.py
+__SHARED__	reference_fasta	/extscratch/morinlab/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Sequence/WholeGenomeFasta/GRCh37-lite.fa
+__SHARED__	excluded_regions	/extscratch/morinlab/software/delly/0.6.3/excludeTemplates/human.hg19.excl.tsv
+__SHARED__	num_delly_threads	2
+__SHARED__	setup_env	source /extscratch/morinlab/software/env.sh
