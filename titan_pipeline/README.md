@@ -16,4 +16,4 @@ receive a string. For now, the list is hard-coded in the `tasks.yaml` file.
 See: https://www.bcgsc.ca/jira/browse/PFD-552. 
 
 4. By default, this pipeline is meant for exomes. If you wish to run 
-it on genomes, you have to set `target_list` in the setup file to `null`. 
+it on genomes, you have to set `target_list` in the setup file to `NULL`. 

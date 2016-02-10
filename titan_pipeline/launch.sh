@@ -1,5 +1,5 @@
 NAME="titan_pipeline"
-VERSION="5.0"
+VERSION="5.1"
 /extscratch/morinlab/software/anaconda/2.3.0/envs/kronos-2.0.4/bin/kronos \
     run \
         --working_dir . \
@@ -8,7 +8,7 @@ VERSION="5.0"
         --setup_file "/extscratch/morinlab/software/pipelines_morinlab/$VERSION/$NAME/setup.GRCh37-lite.genesis.tsv" \
         --input_samples "samples.tsv" \
         --job_scheduler "sge" \
-        --components_dir "/extscratch/morinlab/software/pipeline_components_shahlab/cycle008.3" \
+        --components_dir "/extscratch/morinlab/software/pipeline_components_shahlab/cycle008.3-fix" \
         --python_installation "/extscratch/morinlab/software/anaconda/2.3.0/envs/kronos-2.0.4/bin/python" \
         --num_pipelines "10" \
         --num_jobs "200" \
