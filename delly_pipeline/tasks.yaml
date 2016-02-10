@@ -52,7 +52,7 @@ __TASK_DELLY_DEL_SOMATIC_FILTER__:
         output_files:
             outFile: "2-delly-somatic/$sample_id.DEL.somatic.vcf"
         parameters:
-            siteFilter: False
+            siteFilter: True
             minSize: 400
             svType: ("__TASK_DELLY_DEL__", "sv_type")
             maxSize: '__OPTIONAL__'
@@ -113,7 +113,7 @@ __TASK_DELLY_DUP_SOMATIC_FILTER__:
         output_files:
             outFile: "2-delly-somatic/$sample_id.DUP.somatic.vcf"
         parameters:
-            siteFilter: False
+            siteFilter: True
             minSize: 400
             svType: ("__TASK_DELLY_DUP__", "sv_type")
             maxSize: '__OPTIONAL__'
@@ -175,7 +175,7 @@ __TASK_DELLY_INV_SOMATIC_FILTER__:
         output_files:
             outFile: "2-delly-somatic/$sample_id.INV.somatic.vcf"
         parameters:
-            siteFilter: False
+            siteFilter: True
             minSize: 400
             svType: ("__TASK_DELLY_INV__", "sv_type")
             maxSize: '__OPTIONAL__'
@@ -237,7 +237,7 @@ __TASK_DELLY_TRA_SOMATIC_FILTER__:
         output_files:
             outFile: "2-delly-somatic/$sample_id.TRA.somatic.vcf"
         parameters:
-            siteFilter: False
+            siteFilter: True
             minSize: 0
             svType: ("__TASK_DELLY_TRA__", "sv_type")
             maxSize: '__OPTIONAL__'
