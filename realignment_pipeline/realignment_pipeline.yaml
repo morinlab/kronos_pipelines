@@ -10,62 +10,9 @@ __PIPELINE_INFO__:
     date_last_updated: '3 January 2015'
     factory_version: '2.0.4'
 
-
-__GENERAL__:
-    python: '/path/to/python2.7' # MUST CONTAIN PYSAM MODULE
-    samtools: '/path/to/samtools'
-    bamhash_checksum_bam: '/path/to/bamhash_checksum_bam'
-    hash_read_names: '/path/to/hash_read_names.py'
-    bwa: '/path/to/bwa'
-    pysam_bam2fq: '/path/to/pysam_bam2fq.py'
-    picard_binary: '/path/to/picard.jar'
-    gatk_binary: '/path/to/GenomeAnalysisTK.jar'
-    java_binary: '/path/to/java'
-
-
-__SHARED__:
-    bwa_index_prefix: '/path/to/human_genome_reference'
-    gatk_reference: '/path/to/gatk_reference'
-    use_cluster: True
-
-
-__SAMPLES__:
-    SAMPLE_ID:
-        input_bam: '/path/to/bam_to_realign'
-
-
 # -------------------------------------------------------------------------------- #
 # -----------------------------------  Wave 1  ----------------------------------- #
 # -------------------------------------------------------------------------------- #
-
-__TASK_BAM2FQ__:
-    reserved:
-        # do not change this section.
-        component_name: 'pysam_bam2fq'
-        component_version: 'v1.0.0'
-        seed_version: 'v1.0.0'
-    run:
-        # NOTE: component cannot run in parallel mode.
-        use_cluster: ("__SHARED__", "use_cluster")
-        memory: '6G'
-        num_cpus: 1
-        forced_dependencies: []
-        add_breakpoint: True
-    component:
-        input_files:
-            bam: ("__SAMPLES__", "input_bam")
-        output_files:
-            outdir: "1-bam2fq/"
-            interval_file: 1-bam2fq/$sample_id.chunks.txt
-    component:
-        input_files:
-            bam: ("__SAMPLES__", "input_bam")
-        output_files:
-            interval_file: "1-bam2fq/intervals.txt"
-            output_dir: "1-bam2fq/"
-        parameters:
-            num_reads: '__OPTIONAL__'
-
 
 __TASK_BAMHASH_ORIGINAL__:
     reserved:
@@ -74,8 +21,8 @@ __TASK_BAMHASH_ORIGINAL__:
         seed_version: 'v1.0'
     run:
         use_cluster: ("__SHARED__", "use_cluster")
-        memory: '5G'
-        num_cpus: 1
+        memory: '8G'
+        num_cpus: ('__SHARED__', 'num_cpus')
         forced_dependencies: []
         add_breakpoint: False
     component:
@@ -84,7 +31,6 @@ __TASK_BAMHASH_ORIGINAL__:
         output_files:
             out_checksum: "1-bamhash_original/hashsum.txt"
 
-
 __TASK_HASH_READ_NAMES_ORIGINAL__:
     reserved:
         component_name: 'hash_read_names'
@@ -92,8 +38,8 @@ __TASK_HASH_READ_NAMES_ORIGINAL__:
         seed_version: 'v1.0'
     run:
         use_cluster: ("__SHARED__", "use_cluster")
-        memory: '5G'
-        num_cpus: 1
+        memory: '10G'
+        num_cpus: ('__SHARED__', 'num_cpus')
         forced_dependencies: []
         add_breakpoint: False
     component:
@@ -102,31 +48,28 @@ __TASK_HASH_READ_NAMES_ORIGINAL__:
         output_files:
             hash_sum_outfile: "1-hash_read_names_original/hashsum.txt"
 
+__TASK_BAM2FQ__:
+    reserved:
+        component_name: 'pysam_bam2fq'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0.0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '10G'
+        num_cpus: ('__SHARED__', 'num_cpus')
+        forced_dependencies: []
+        add_breakpoint: True
+    component:
+        input_files:
+            bam: ("__SAMPLES__", "input_bam")
+        output_files:
+            output_dir: "1-bam2fq/"
+            interval_file: ("__SAMPLES__", "interval_file")
+
 
 # -------------------------------------------------------------------------------- #
 # -----------------------------------  Wave 2  ----------------------------------- #
 # -------------------------------------------------------------------------------- #
-
-__TASK_BWA_MEM__:
-    reserved:
-        component_name: 'bwa_mem_parallelized'
-        component_version: 'v1.0.0'
-        seed_version: 'v1.0'
-    run:
-        use_cluster: ("__SHARED__", "use_cluster")
-        memory: '6G'
-        num_cpus: 1
-        forced_dependencies: []
-        add_breakpoint: False
-        parallel_run: True
-        interval_file: ""
-    component:
-        input_files:
-            input_dir: ("__TASK_BAM2FQ__", "outdir")
-            bwa_index_prefix: ('__SHARED__', 'bwa_index_prefix')
-        output_files:
-            output_dir: "2-bwa_mem/"
-
 
 __TASK_HASH_READ_NAMES_BAM2FQ__:
     reserved:
@@ -135,9 +78,9 @@ __TASK_HASH_READ_NAMES_BAM2FQ__:
         seed_version: 'v1.0'
     run:
         use_cluster: ("__SHARED__", "use_cluster")
-        memory: '5G'
-        num_cpus: 1
-        forced_dependencies: ['__TASK_BAM2FQ__']
+        memory: '8G'
+        num_cpus: ('__SHARED__', 'num_cpus')
+        forced_dependencies: ['__TASK_BAM2FQ__', '__TASK_HASH_READ_NAMES_ORIGINAL__']
         add_breakpoint: False
     component:
         input_files:
@@ -148,31 +91,32 @@ __TASK_HASH_READ_NAMES_BAM2FQ__:
         output_files:
             hash_sum_outfile: "2-hash_read_names_bam2fq/hashsum.txt"
 
-
-# -------------------------------------------------------------------------------- #
-# -----------------------------------  Wave 3  ----------------------------------- #
-# -------------------------------------------------------------------------------- #
-
-__TASK_SAMTOOLS_SORT__:
+__TASK_BWA_MEM__:
     reserved:
-        component_name: 'samtools_sort_parallelized'
+        component_name: 'bwa_mem_parallelized'
         component_version: 'v1.0.0'
         seed_version: 'v1.0'
     run:
         use_cluster: ("__SHARED__", "use_cluster")
-        memory: '6G'
-        num_cpus: 1
-        forced_dependencies: []
+        memory: '8G'
+        num_cpus: ('__SHARED__', 'num_cpus')
+        forced_dependencies: ['__TASK_HASH_READ_NAMES_BAM2FQ__']
         add_breakpoint: False
         parallel_run: True
-        parallel_params: []
-        interval_file: ""
+        interval_file: #("__SAMPLES__", "interval_file")
     component:
         input_files:
-            input_dir: ("__TASK_BWA_MEM__", "output_dir")
+            input_dir: "1-bam2fq/"
+            bwa_index_prefix: ('__SHARED__', 'bwa_index_prefix')
         output_files:
-            output_dir: "3-samtools_sort/"
+            output_dir: "2-bwa_mem/"
+        parameters:
+            M: True
 
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 3  ----------------------------------- #
+# -------------------------------------------------------------------------------- #
 
 __TASK_HASH_READ_NAMES_BWA_MEM__:
     reserved:
@@ -181,18 +125,38 @@ __TASK_HASH_READ_NAMES_BWA_MEM__:
         seed_version: 'v1.0'
     run:
         use_cluster: ("__SHARED__", "use_cluster")
-        memory: '5G'
-        num_cpus: 1
+        memory: '8G'
+        num_cpus: ('__SHARED__', 'num_cpus')
         forced_dependencies: ['__TASK_BWA_MEM__']
         add_breakpoint: False
     component:
         input_files:
             hash_sum_infile: ("__TASK_HASH_READ_NAMES_ORIGINAL__", "hash_sum_outfile")
             new_bams: True
-            directory: ("__TASK_BWA_MEM__", "output_dir")
+            directory: "2-bwa_mem/"
             files: "*.unsorted.bam"
         output_files:
-            hash_sum_outfile: 3-hash_read_names_bwa_mem/hashsum.txt
+            hash_sum_outfile: "3-hash_read_names_bwa_mem/hashsum.txt"
+
+__TASK_SAMTOOLS_SORT__:
+    reserved:
+        component_name: 'samtools_sort_parallelized'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '8G'
+        num_cpus: ('__SHARED__', 'num_cpus')
+        forced_dependencies: ['__TASK_HASH_READ_NAMES_BWA_MEM__']
+        add_breakpoint: False
+        parallel_run: True
+        parallel_params: []
+        interval_file: #("__SAMPLES__", "interval_file")
+    component:
+        input_files:
+            input_dir: "2-bwa_mem/"
+        output_files:
+            output_dir: "3-samtools_sort/"
 
 
 # -------------------------------------------------------------------------------- #
@@ -206,9 +170,9 @@ __TASK_SAMTOOLS_MERGE__:
         seed_version: 'v1.0'
     run:
         use_cluster: ("__SHARED__", "use_cluster")
-        memory: '6G'
-        num_cpus: 1
-        forced_dependencies: ["__TASK_BAM2FQ__", "__TASK_BWA_MEM__", '__TASK_SAMTOOLS_SORT__']
+        memory: '8G'
+        num_cpus: ('__SHARED__', 'num_cpus')
+        forced_dependencies: ['__TASK_SAMTOOLS_SORT__']
         add_breakpoint: False
     component:
         input_files:
@@ -230,7 +194,7 @@ __TASK_REMOVE_FASTQS__:
         add_breakpoint: False
     component:
         input_files:
-            input_dir: ("__TASK_BAM2FQ__", "output_dir")
+            input_dir: "1-bam2fq/"
         parameters:
             file_extension: "*.fastq.gz"
 
@@ -248,7 +212,7 @@ __TASK_REMOVE_UNSORTED_BAMS__:
         add_breakpoint: False
     component:
         input_files:
-            input_dir: ("__TASK_BWA_MEM__", "output_dir")
+            input_dir: "2-bwa_mem/"
         parameters:
             file_extension: "*.unsorted.bam"
 
@@ -257,6 +221,43 @@ __TASK_REMOVE_UNSORTED_BAMS__:
 # -----------------------------------  Wave 5  ----------------------------------- #
 # -------------------------------------------------------------------------------- #
 
+__TASK_HASH_READ_NAMES_MERGED_BAM__:
+    reserved:
+        component_name: 'hash_read_names'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '8G'
+        num_cpus: ('__SHARED__', 'num_cpus')
+        forced_dependencies: ['__TASK_SAMTOOLS_MERGE__']
+        add_breakpoint: False
+    component:
+        input_files:
+            hash_sum_infile: ("__TASK_HASH_READ_NAMES_ORIGINAL__", "hash_sum_outfile")
+            new_bams: True
+            directory: "4-samtools_merge/"
+            files: "$sample_id.merge.bam"
+        output_files:
+            hash_sum_outfile: "5-hash_read_names_merged_bam/hashsum.txt"
+
+__TASK_REMOVE_SORTED_BAMS__:
+    reserved:
+        component_name: 'delete_files'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0.0'
+    run:
+        use_cluster: False
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_HASH_READ_NAMES_MERGED_BAM__']
+        add_breakpoint: False
+    component:
+        input_files:
+            input_dir: "3-samtools_sort/"
+        parameters:
+            file_extension: "*.sorted.bam"
+
 __TASK_PICARD_ADD_OR_REPLACE_READ_GROUPS__:
     reserved:
         component_name: 'picard_add_or_replace_read_groups'
@@ -264,9 +265,9 @@ __TASK_PICARD_ADD_OR_REPLACE_READ_GROUPS__:
         seed_version: '1.136'
     run:
         use_cluster: ("__SHARED__", "use_cluster")
-        memory: '3G'
-        num_cpus: 1
-        forced_dependencies: []
+        memory: '8G'
+        num_cpus: ('__SHARED__', 'num_cpus')
+        forced_dependencies: ['__TASK_HASH_READ_NAMES_MERGED_BAM__']
         add_breakpoint: False
     component:
         input_files:
@@ -281,49 +282,29 @@ __TASK_PICARD_ADD_OR_REPLACE_READ_GROUPS__:
             RGLB: '$sample_id'
 
 
-__TASK_REMOVE_SORTED_BAMS__:
-    reserved:
-        component_name: 'delete_files'
-        component_version: 'v1.0.0'
-        seed_version: 'v1.0.0'
-    run:
-        use_cluster: False
-        memory: '1G'
-        num_cpus: 1
-        forced_dependencies: ['__TASK_SAMTOOLS_MERGE__']
-        add_breakpoint: False
-    component:
-        input_files:
-            input_dir: ("__TASK_SAMTOOLS_SORT__", "output_dir")
-        parameters:
-            file_extension: "*.sorted.bam"
-
-
 # -------------------------------------------------------------------------------- #
 # -----------------------------------  Wave 6  ----------------------------------- #
 # -------------------------------------------------------------------------------- #
 
-__TASK_PICARD_MARK_DUPLICATES__:
+__TASK_HASH_READ_NAMES_READ_GROUP_BAM__:
     reserved:
-        component_name: 'picard_mark_duplicates'
+        component_name: 'hash_read_names'
         component_version: 'v1.0.0'
-        seed_version: '1.136'
+        seed_version: 'v1.0'
     run:
         use_cluster: ("__SHARED__", "use_cluster")
-        memory: '3G'
-        num_cpus: 1
-        forced_dependencies: []
+        memory: '8G'
+        num_cpus: ('__SHARED__', 'num_cpus')
+        forced_dependencies: ['__TASK_PICARD_ADD_OR_REPLACE_READ_GROUPS__']
         add_breakpoint: False
     component:
         input_files:
-            INPUT: ('__TASK_PICARD_ADD_OR_REPLACE_READ_GROUPS__', 'OUTPUT')
+            hash_sum_infile: ("__TASK_HASH_READ_NAMES_ORIGINAL__", "hash_sum_outfile")
+            new_bams: True
+            directory: "5-picard_add_or_replace_read_groups/"
+            files: "$sample_id.merge.rg.bam"
         output_files:
-            OUTPUT: "6-picard_mark_duplicates/$sample_id.merge.rg.mdups.bam"
-            METRICS_FILE: "6-picard_mark_duplicates/$sample_id.metrics.txt"
-        parameters:
-            picard_command: 'MarkDuplicates'
-            ASSUME_SORTED: True
-
+            hash_sum_outfile: "6-hash_read_names_read_group_bam/hashsum.txt"
 
 __TASK_REMOVE_MERGED_BAM__:
     reserved:
@@ -334,38 +315,59 @@ __TASK_REMOVE_MERGED_BAM__:
         use_cluster: False
         memory: '1G'
         num_cpus: 1
-        forced_dependencies: ['__TASK_PICARD_ADD_OR_REPLACE_READ_GROUPS__']
+        forced_dependencies: ['__TASK_HASH_READ_NAMES_READ_GROUP_BAM__']
         add_breakpoint: False
     component:
         input_files:
             files: ("__TASK_SAMTOOLS_MERGE__", "output_file")
+            input_dir: 
 
+__TASK_PICARD_MARK_DUPLICATES__:
+    reserved:
+        component_name: 'picard_mark_duplicates'
+        component_version: 'v1.0.0'
+        seed_version: '1.136'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '8G'
+        num_cpus: ('__SHARED__', 'num_cpus')
+        forced_dependencies: ['__TASK_HASH_READ_NAMES_READ_GROUP_BAM__']
+        add_breakpoint: False
+    component:
+        input_files:
+            INPUT: ('__TASK_PICARD_ADD_OR_REPLACE_READ_GROUPS__', 'OUTPUT')
+        output_files:
+            OUTPUT: "6-picard_mark_duplicates/$sample_id.merge.rg.mdups.bam"
+            METRICS_FILE: "6-picard_mark_duplicates/$sample_id.metrics.txt"
+        parameters:
+            picard_command: 'MarkDuplicates'
+            ASSUME_SORTED: True
+            java_memory: '5G'
+            CREATE_INDEX: True
 
 # -------------------------------------------------------------------------------- #
 # -----------------------------------  Wave 7  ----------------------------------- #
 # -------------------------------------------------------------------------------- #
 
-__TASK_GATK_REALIGNER_TARGET_CREATOR__:
+__TASK_HASH_READ_NAMES_MARK_DUPLICATES_BAM__:
     reserved:
-        component_name: 'gatk_realigner_target_creator'
+        component_name: 'hash_read_names'
         component_version: 'v1.0.0'
-        seed_version: '3.4-0'
+        seed_version: 'v1.0'
     run:
         use_cluster: ("__SHARED__", "use_cluster")
-        memory: '6G'
-        num_cpus: 1
-        forced_dependencies: []
+        memory: '8G'
+        num_cpus: ('__SHARED__', 'num_cpus')
+        forced_dependencies: ['__TASK_PICARD_MARK_DUPLICATES__']
         add_breakpoint: False
     component:
         input_files:
-            input_file: ("__TASK_PICARD_MARK_DUPLICATES__", "OUTPUT")
-            reference_sequence: ("__SHARED__", "gatk_reference")
+            hash_sum_infile: ("__TASK_HASH_READ_NAMES_ORIGINAL__", "hash_sum_outfile")
+            new_bams: True
+            directory: "6-picard_mark_duplicates/"
+            files: "$sample_id.merge.rg.mdups.bam"
         output_files:
-            out: "7-gatk_realigner_target_creator/$sample_id.realigner_targets.txt"
-        parameters:
-            java_memory: '5G'
-            analysis_type: 'RealignerTargetCreator'
-
+            hash_sum_outfile: "7-hash_read_names_mark_duplicates_bam/hashsum.txt"
 
 __TASK_REMOVE_READGROUP_BAM__:
     reserved:
@@ -376,11 +378,33 @@ __TASK_REMOVE_READGROUP_BAM__:
         use_cluster: False
         memory: '1G'
         num_cpus: 1
-        forced_dependencies: ['__TASK_PICARD_MARK_DUPLICATES__']
+        forced_dependencies: ['__TASK_HASH_READ_NAMES_MARK_DUPLICATES_BAM__']
         add_breakpoint: False
     component:
         input_files:
             files: ("__TASK_PICARD_ADD_OR_REPLACE_READ_GROUPS__", "OUTPUT")
+            input_dir:
+
+__TASK_GATK_REALIGNER_TARGET_CREATOR__:
+    reserved:
+        component_name: 'gatk_realigner_target_creator'
+        component_version: 'v1.0.0'
+        seed_version: '3.4-0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '8G'
+        num_cpus: ('__SHARED__', 'num_cpus')
+        forced_dependencies: ['__TASK_HASH_READ_NAMES_MARK_DUPLICATES_BAM__']
+        add_breakpoint: False
+    component:
+        input_files:
+            input_file: ("__TASK_PICARD_MARK_DUPLICATES__", "OUTPUT")
+            reference_sequence: ("__SHARED__", "gatk_reference")
+        output_files:
+            out: "7-gatk_realigner_target_creator/$sample_id.realigner_targets.intervals"
+        parameters:
+            java_memory: '5G'
+            analysis_type: 'RealignerTargetCreator'
 
 
 # -------------------------------------------------------------------------------- #
@@ -394,9 +418,9 @@ __TASK_GATK_INDEL_REALIGNER__:
         seed_version: '3.4-0'
     run:
         use_cluster: ("__SHARED__", "use_cluster")
-        memory: '6G'
-        num_cpus: 1
-        forced_dependencies: []
+        memory: '8G'
+        num_cpus: ('__SHARED__', 'num_cpus')
+        forced_dependencies: ['__TASK_GATK_REALIGNER_TARGET_CREATOR__']
         add_breakpoint: False
     component:
         input_files:
@@ -409,32 +433,29 @@ __TASK_GATK_INDEL_REALIGNER__:
             analysis_type: 'IndelRealigner'
             java_memory: '5G'
 
-
 # -------------------------------------------------------------------------------- #
 # -----------------------------------  Wave 9  ----------------------------------- #
 # -------------------------------------------------------------------------------- #
 
-__TASK_BAMUTIL_CLIPOVERLAP__:
+__TASK_HASH_READ_NAMES_INDEL_REALIGNER_BAM__:
     reserved:
-        # do not change this section.
-        component_name: 'clipoverlap'
-        component_version: '1.0.0'
-        seed_version: '2.16'
+        component_name: 'hash_read_names'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
     run:
-        # NOTE: component cannot run in parallel mode.
         use_cluster: ("__SHARED__", "use_cluster")
-        memory: '3G'
-        num_cpus: 1
-        forced_dependencies: []
+        memory: '8G'
+        num_cpus: ('__SHARED__', 'num_cpus')
+        forced_dependencies: ['__TASK_GATK_INDEL_REALIGNER__']
         add_breakpoint: False
-        env_vars:
-        boilerplate:
     component:
         input_files:
-            input_file: ("__TASK_GATK_INDEL_REALIGNER__", "out")
+            hash_sum_infile: ("__TASK_HASH_READ_NAMES_ORIGINAL__", "hash_sum_outfile")
+            new_bams: True
+            directory: "8-gatk_indel_realigner/"
+            files: "$sample_id.merge.rg.mdups.realn.bam"
         output_files:
-            output_file: "9-bamutil_clipoverlap/$sample_id.merge.rg.mdups.realn.clipolap.bam"
-        parameters:
+            hash_sum_outfile: "9-hash_read_names_indel_realigner_bam/hashsum.txt"
 
 
 __TASK_REMOVE_MARK_DUPLICATES_BAM__:
@@ -446,58 +467,36 @@ __TASK_REMOVE_MARK_DUPLICATES_BAM__:
         use_cluster: False
         memory: '1G'
         num_cpus: 1
-        forced_dependencies: ['__TASK_GATK_INDEL_REALIGNER__']
+        forced_dependencies: ['__TASK_HASH_READ_NAMES_INDEL_REALIGNER_BAM__']
         add_breakpoint: False
     component:
         input_files:
             files: ("__TASK_PICARD_MARK_DUPLICATES__", "OUTPUT")
+            input_dir:
 
+__TASK_BAMUTIL_CLIPOVERLAP__:
+    reserved:
+        component_name: 'clipoverlap'
+        component_version: '1.0.0'
+        seed_version: '2.16'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '8G'
+        num_cpus: ('__SHARED__', 'num_cpus')
+        forced_dependencies: ['__TASK_HASH_READ_NAMES_INDEL_REALIGNER_BAM__']
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            input_file: ("__TASK_GATK_INDEL_REALIGNER__", "out")
+        output_files:
+            output_file: "9-bamutil_clipoverlap/$sample_id.merge.rg.mdups.realn.clipolap.bam"
+        parameters:
 
 # -------------------------------------------------------------------------------- #
 # -----------------------------------  Wave 10  ---------------------------------- #
 # -------------------------------------------------------------------------------- #
-
-__TASK_SAMTOOLS_INDEX__:
-    reserved:
-        # do not change this section.
-        component_name: 'samtools_index'
-        component_version: 'v1.0.0'
-        seed_version: 'v0.1.19'
-    run:
-        # NOTE: component cannot run in parallel mode.
-        use_cluster: ("__SHARED__", "use_cluster")
-        memory: '1G'
-        num_cpus: 1
-        forced_dependencies: []
-        add_breakpoint: False
-        env_vars:
-        boilerplate:
-    component:
-        input_files:
-            bam_file: ("__TASK_BAMUTIL_CLIPOVERLAP__", "output_file")
-        output_files:
-        parameters:
-
-
-__TASK_BAMHASH_FINAL__:
-    reserved:
-        component_name: 'bamhash_checksum_bam'
-        component_version: 'v1.0.0'
-        seed_version: 'v1.0'
-    run:
-        use_cluster: ("__SHARED__", "use_cluster")
-        memory: '5G'
-        num_cpus: 1
-        forced_dependencies: []
-        add_breakpoint: False
-        env_vars:
-        boilerplate:
-    component:
-        input_files:
-            in_bams: ("__TASK_BAMUTIL_CLIPOVERLAP__", "output_file")
-        output_files:
-            out_checksum: "10-bamhash_final/hashsum_final.txt"
-
 
 __TASK_HASH_READ_NAMES_CLIPOVERLAP__:
     reserved:
@@ -506,20 +505,18 @@ __TASK_HASH_READ_NAMES_CLIPOVERLAP__:
         seed_version: 'v1.0'
     run:
         use_cluster: ("__SHARED__", "use_cluster")
-        memory: '5G'
-        num_cpus: 1
+        memory: '8G'
+        num_cpus: ('__SHARED__', 'num_cpus')
         forced_dependencies: ['__TASK_BAMUTIL_CLIPOVERLAP__']
         add_breakpoint: False
     component:
         input_files:
             hash_sum_infile: ("__TASK_HASH_READ_NAMES_ORIGINAL__", "hash_sum_outfile")
+            new_bams: True
+            directory: "9-bamutil_clipoverlap/"
+            files: "$sample_id.merge.rg.mdups.realn.clipolap.bam"
         output_files:
-            new_bams: ('__SAMPLES__', 'indel_realigned_bam')
-
-
-# -------------------------------------------------------------------------------- #
-# -----------------------------------  Wave 11  ---------------------------------- #
-# -------------------------------------------------------------------------------- #
+            hash_sum_outfile: "10-hash_read_names_clipoverlap/hashsum.txt"
 
 __TASK_REMOVE_INDEL_REALIGNED_BAM__:
     reserved:
@@ -535,3 +532,42 @@ __TASK_REMOVE_INDEL_REALIGNED_BAM__:
     component:
         input_files:
             files: ("__TASK_GATK_INDEL_REALIGNER__", "out")
+            input_dir:
+
+__TASK_SAMTOOLS_INDEX__:
+    reserved:
+        component_name: 'samtools_index'
+        component_version: 'v1.0.0'
+        seed_version: 'v0.1.19'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '8G'
+        num_cpus: ('__SHARED__', 'num_cpus')
+        forced_dependencies: ['__TASK_HASH_READ_NAMES_CLIPOVERLAP__']
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            bam_file: ("__TASK_BAMUTIL_CLIPOVERLAP__", "output_file")
+        output_files:
+        parameters:
+
+__TASK_BAMHASH_FINAL__:
+    reserved:
+        component_name: 'bamhash_checksum_bam'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '8G'
+        num_cpus: ('__SHARED__', 'num_cpus')
+        forced_dependencies: ['__TASK_HASH_READ_NAMES_CLIPOVERLAP__']
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            in_bams: ("__TASK_BAMUTIL_CLIPOVERLAP__", "output_file")
+        output_files:
+            out_checksum: "10-bamhash_final/hashsum_final.txt"
