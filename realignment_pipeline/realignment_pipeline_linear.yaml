@@ -286,26 +286,6 @@ __TASK_PICARD_ADD_OR_REPLACE_READ_GROUPS__:
 # -----------------------------------  Wave 6  ----------------------------------- #
 # -------------------------------------------------------------------------------- #
 
-__TASK_HASH_READ_NAMES_READ_GROUP_BAM__:
-    reserved:
-        component_name: 'hash_read_names'
-        component_version: 'v1.0.0'
-        seed_version: 'v1.0'
-    run:
-        use_cluster: ("__SHARED__", "use_cluster")
-        memory: '8G'
-        num_cpus: ('__SHARED__', 'num_cpus')
-        forced_dependencies: ['__TASK_PICARD_ADD_OR_REPLACE_READ_GROUPS__']
-        add_breakpoint: False
-    component:
-        input_files:
-            hash_sum_infile: ("__TASK_HASH_READ_NAMES_ORIGINAL__", "hash_sum_outfile")
-            new_bams: True
-            directory: "5-picard_add_or_replace_read_groups/"
-            files: "$sample_id.merge.rg.bam"
-        output_files:
-            hash_sum_outfile: "6-hash_read_names_read_group_bam/hashsum.txt"
-
 __TASK_REMOVE_MERGED_BAM__:
     reserved:
         component_name: 'delete_files'
@@ -315,7 +295,7 @@ __TASK_REMOVE_MERGED_BAM__:
         use_cluster: False
         memory: '1G'
         num_cpus: 1
-        forced_dependencies: ['__TASK_HASH_READ_NAMES_READ_GROUP_BAM__']
+        forced_dependencies: ['__TASK_PICARD_ADD_OR_REPLACE_READ_GROUPS__']
         add_breakpoint: False
     component:
         input_files:
@@ -331,7 +311,7 @@ __TASK_PICARD_MARK_DUPLICATES__:
         use_cluster: ("__SHARED__", "use_cluster")
         memory: '8G'
         num_cpus: ('__SHARED__', 'num_cpus')
-        forced_dependencies: ['__TASK_HASH_READ_NAMES_READ_GROUP_BAM__']
+        forced_dependencies: ['__TASK_PICARD_ADD_OR_REPLACE_READ_GROUPS__']
         add_breakpoint: False
     component:
         input_files:
@@ -349,26 +329,6 @@ __TASK_PICARD_MARK_DUPLICATES__:
 # -----------------------------------  Wave 7  ----------------------------------- #
 # -------------------------------------------------------------------------------- #
 
-__TASK_HASH_READ_NAMES_MARK_DUPLICATES_BAM__:
-    reserved:
-        component_name: 'hash_read_names'
-        component_version: 'v1.0.0'
-        seed_version: 'v1.0'
-    run:
-        use_cluster: ("__SHARED__", "use_cluster")
-        memory: '8G'
-        num_cpus: ('__SHARED__', 'num_cpus')
-        forced_dependencies: ['__TASK_PICARD_MARK_DUPLICATES__']
-        add_breakpoint: False
-    component:
-        input_files:
-            hash_sum_infile: ("__TASK_HASH_READ_NAMES_ORIGINAL__", "hash_sum_outfile")
-            new_bams: True
-            directory: "6-picard_mark_duplicates/"
-            files: "$sample_id.merge.rg.mdups.bam"
-        output_files:
-            hash_sum_outfile: "7-hash_read_names_mark_duplicates_bam/hashsum.txt"
-
 __TASK_REMOVE_READGROUP_BAM__:
     reserved:
         component_name: 'delete_files'
@@ -378,7 +338,7 @@ __TASK_REMOVE_READGROUP_BAM__:
         use_cluster: False
         memory: '1G'
         num_cpus: 1
-        forced_dependencies: ['__TASK_HASH_READ_NAMES_MARK_DUPLICATES_BAM__']
+        forced_dependencies: ['__TASK_PICARD_MARK_DUPLICATES__']
         add_breakpoint: False
     component:
         input_files:
@@ -394,7 +354,7 @@ __TASK_GATK_REALIGNER_TARGET_CREATOR__:
         use_cluster: ("__SHARED__", "use_cluster")
         memory: '8G'
         num_cpus: ('__SHARED__', 'num_cpus')
-        forced_dependencies: ['__TASK_HASH_READ_NAMES_MARK_DUPLICATES_BAM__']
+        forced_dependencies: ['__TASK_PICARD_MARK_DUPLICATES__']
         add_breakpoint: False
     component:
         input_files:
@@ -437,27 +397,6 @@ __TASK_GATK_INDEL_REALIGNER__:
 # -----------------------------------  Wave 9  ----------------------------------- #
 # -------------------------------------------------------------------------------- #
 
-__TASK_HASH_READ_NAMES_INDEL_REALIGNER_BAM__:
-    reserved:
-        component_name: 'hash_read_names'
-        component_version: 'v1.0.0'
-        seed_version: 'v1.0'
-    run:
-        use_cluster: ("__SHARED__", "use_cluster")
-        memory: '8G'
-        num_cpus: ('__SHARED__', 'num_cpus')
-        forced_dependencies: ['__TASK_GATK_INDEL_REALIGNER__']
-        add_breakpoint: False
-    component:
-        input_files:
-            hash_sum_infile: ("__TASK_HASH_READ_NAMES_ORIGINAL__", "hash_sum_outfile")
-            new_bams: True
-            directory: "8-gatk_indel_realigner/"
-            files: "$sample_id.merge.rg.mdups.realn.bam"
-        output_files:
-            hash_sum_outfile: "9-hash_read_names_indel_realigner_bam/hashsum.txt"
-
-
 __TASK_REMOVE_MARK_DUPLICATES_BAM__:
     reserved:
         component_name: 'delete_files'
@@ -467,7 +406,7 @@ __TASK_REMOVE_MARK_DUPLICATES_BAM__:
         use_cluster: False
         memory: '1G'
         num_cpus: 1
-        forced_dependencies: ['__TASK_HASH_READ_NAMES_INDEL_REALIGNER_BAM__']
+        forced_dependencies: ['__TASK_GATK_INDEL_REALIGNER__']
         add_breakpoint: False
     component:
         input_files:
@@ -483,7 +422,7 @@ __TASK_BAMUTIL_CLIPOVERLAP__:
         use_cluster: ("__SHARED__", "use_cluster")
         memory: '8G'
         num_cpus: ('__SHARED__', 'num_cpus')
-        forced_dependencies: ['__TASK_HASH_READ_NAMES_INDEL_REALIGNER_BAM__']
+        forced_dependencies: ['__TASK_GATK_INDEL_REALIGNER__']
         add_breakpoint: False
         env_vars:
         boilerplate:
@@ -498,26 +437,6 @@ __TASK_BAMUTIL_CLIPOVERLAP__:
 # -----------------------------------  Wave 10  ---------------------------------- #
 # -------------------------------------------------------------------------------- #
 
-__TASK_HASH_READ_NAMES_CLIPOVERLAP__:
-    reserved:
-        component_name: 'hash_read_names'
-        component_version: 'v1.0.0'
-        seed_version: 'v1.0'
-    run:
-        use_cluster: ("__SHARED__", "use_cluster")
-        memory: '8G'
-        num_cpus: ('__SHARED__', 'num_cpus')
-        forced_dependencies: ['__TASK_BAMUTIL_CLIPOVERLAP__']
-        add_breakpoint: False
-    component:
-        input_files:
-            hash_sum_infile: ("__TASK_HASH_READ_NAMES_ORIGINAL__", "hash_sum_outfile")
-            new_bams: True
-            directory: "9-bamutil_clipoverlap/"
-            files: "$sample_id.merge.rg.mdups.realn.clipolap.bam"
-        output_files:
-            hash_sum_outfile: "10-hash_read_names_clipoverlap/hashsum.txt"
-
 __TASK_REMOVE_INDEL_REALIGNED_BAM__:
     reserved:
         component_name: 'delete_files'
@@ -527,7 +446,7 @@ __TASK_REMOVE_INDEL_REALIGNED_BAM__:
         use_cluster: False
         memory: '1G'
         num_cpus: 1
-        forced_dependencies: ['__TASK_HASH_READ_NAMES_CLIPOVERLAP__']
+        forced_dependencies: ['__TASK_BAMUTIL_CLIPOVERLAP__']
         add_breakpoint: False
     component:
         input_files:
@@ -543,7 +462,7 @@ __TASK_SAMTOOLS_INDEX__:
         use_cluster: ("__SHARED__", "use_cluster")
         memory: '8G'
         num_cpus: ('__SHARED__', 'num_cpus')
-        forced_dependencies: ['__TASK_HASH_READ_NAMES_CLIPOVERLAP__']
+        forced_dependencies: ['__TASK_BAMUTIL_CLIPOVERLAP__']
         add_breakpoint: False
         env_vars:
         boilerplate:
@@ -562,7 +481,7 @@ __TASK_BAMHASH_FINAL__:
         use_cluster: ("__SHARED__", "use_cluster")
         memory: '8G'
         num_cpus: ('__SHARED__', 'num_cpus')
-        forced_dependencies: ['__TASK_HASH_READ_NAMES_CLIPOVERLAP__']
+        forced_dependencies: ['__TASK_BAMUTIL_CLIPOVERLAP__']
         add_breakpoint: False
         env_vars:
         boilerplate:
