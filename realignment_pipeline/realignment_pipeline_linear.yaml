@@ -40,7 +40,7 @@ __TASK_HASH_READ_NAMES_ORIGINAL__:
         use_cluster: ("__SHARED__", "use_cluster")
         memory: '10G'
         num_cpus: ('__SHARED__', 'num_cpus')
-        forced_dependencies: []
+        forced_dependencies: ['__TASK_BAMHASH_ORIGINAL__']
         add_breakpoint: False
     component:
         input_files:
@@ -57,7 +57,7 @@ __TASK_BAM2FQ__:
         use_cluster: ("__SHARED__", "use_cluster")
         memory: '10G'
         num_cpus: ('__SHARED__', 'num_cpus')
-        forced_dependencies: []
+        forced_dependencies: ['__TASK_HASH_READ_NAMES_ORIGINAL__']
         add_breakpoint: True
     component:
         input_files:
@@ -80,7 +80,7 @@ __TASK_HASH_READ_NAMES_BAM2FQ__:
         use_cluster: ("__SHARED__", "use_cluster")
         memory: '8G'
         num_cpus: ('__SHARED__', 'num_cpus')
-        forced_dependencies: ['__TASK_BAM2FQ__', '__TASK_HASH_READ_NAMES_ORIGINAL__']
+        forced_dependencies: ['__TASK_BAM2FQ__']
         add_breakpoint: False
     component:
         input_files:
