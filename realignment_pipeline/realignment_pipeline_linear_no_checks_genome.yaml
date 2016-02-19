@@ -1,0 +1,392 @@
+__PIPELINE_INFO__:
+    name: 'REALIGN'
+    version: 'v1.0.0'
+    author: 'ppararaj <ppararaj@sfu.ca>'
+    data_type: 'BAM'
+    input_type: 'BAM'
+    output_type: 'BAM'
+    host_cluster: 'genesis'
+    date_created: '22 DECEMBER 2015'
+    date_last_updated: '3 January 2015'
+    factory_version: '2.0.4'
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 1  ----------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__TASK_BAM2FQ__:
+    reserved:
+        # do not change this section.
+        component_name: 'pysam_bam2fq'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '40G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: True
+    component:
+        input_files:
+            bam: ("__SAMPLES__", "input_bam")
+        output_files:
+            output_dir: "1-bam2fq/"
+            interval_file: ("__SAMPLES__", "interval_file")
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 2  ----------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__TASK_BWA_MEM__:
+    reserved:
+        component_name: 'bwa_mem_parallelized'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '8G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_BAM2FQ__']
+        add_breakpoint: False
+        parallel_run: True
+        interval_file: ("__SAMPLES__", "interval_file")
+    component:
+        input_files:
+            input_dir: "1-bam2fq/"
+            bwa_index_prefix: ('__SHARED__', 'bwa_index_prefix')
+        output_files:
+            output_dir: "2-bwa_mem/"
+        parameters:
+            M: True
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 3  ----------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__TASK_SAMTOOLS_SORT__:
+    reserved:
+        component_name: 'samtools_sort_parallelized'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '4G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_BWA_MEM__']
+        add_breakpoint: False
+        parallel_run: True
+        parallel_params: []
+        interval_file: ("__SAMPLES__", "interval_file")
+    component:
+        input_files:
+            input_dir: "2-bwa_mem/"
+        output_files:
+            output_dir: "3-samtools_sort/"
+
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 4  ----------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__TASK_SAMTOOLS_MERGE__:
+    reserved:
+        component_name: 'samtools_merge'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '2G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_SAMTOOLS_SORT__']
+        add_breakpoint: False
+    component:
+        input_files:
+            input_dir: "3-samtools_sort/"  # Must be in sync with __TASK_SAMTOOLS_SORT__'s output_dir
+        output_files:
+            output_file: "4-samtools_merge/$sample_id.merge.bam"
+
+
+__TASK_REMOVE_FASTQS__:
+    reserved:
+        component_name: 'delete_files'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0.0'
+    run:
+        use_cluster: False
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_BWA_MEM__']
+        add_breakpoint: False
+    component:
+        input_files:
+            input_dir: "1-bam2fq/"
+        parameters:
+            file_extension: "*.fastq.gz"
+
+
+__TASK_REMOVE_UNSORTED_BAMS__:
+    reserved:
+        component_name: 'delete_files'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0.0'
+    run:
+        use_cluster: False
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_SAMTOOLS_SORT__']
+        add_breakpoint: False
+    component:
+        input_files:
+            input_dir: "2-bwa_mem/"
+        parameters:
+            file_extension: "*.unsorted.bam"
+
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 5  ----------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__TASK_PICARD_ADD_OR_REPLACE_READ_GROUPS__:
+    reserved:
+        component_name: 'picard_add_or_replace_read_groups'
+        component_version: 'v1.0.0'
+        seed_version: '1.136'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '2G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_SAMTOOLS_MERGE__']
+        add_breakpoint: False
+    component:
+        input_files:
+            INPUT: ('__TASK_SAMTOOLS_MERGE__', 'output_file')
+        output_files:
+            OUTPUT: "5-picard_add_or_replace_read_groups/$sample_id.merge.rg.bam"
+        parameters:
+            RGPL: 'illumina'
+            RGPU: 'run1'
+            picard_command: 'AddOrReplaceReadGroups'
+            RGSM: '$sample_id'
+            RGLB: '$sample_id'
+
+
+__TASK_REMOVE_SORTED_BAMS__:
+    reserved:
+        component_name: 'delete_files'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0.0'
+    run:
+        use_cluster: False
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_SAMTOOLS_MERGE__']
+        add_breakpoint: False
+    component:
+        input_files:
+            input_dir: "3-samtools_sort/"
+        parameters:
+            file_extension: "*.sorted.bam"
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 6  ----------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__TASK_PICARD_MARK_DUPLICATES__:
+    reserved:
+        component_name: 'picard_mark_duplicates'
+        component_version: 'v1.0.0'
+        seed_version: '1.136'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '8G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_PICARD_ADD_OR_REPLACE_READ_GROUPS__']
+        add_breakpoint: False
+    component:
+        input_files:
+            INPUT: ('__TASK_PICARD_ADD_OR_REPLACE_READ_GROUPS__', 'OUTPUT')
+        output_files:
+            OUTPUT: "6-picard_mark_duplicates/$sample_id.merge.rg.mdups.bam"
+            METRICS_FILE: "6-picard_mark_duplicates/$sample_id.metrics.txt"
+        parameters:
+            picard_command: 'MarkDuplicates'
+            ASSUME_SORTED: True
+            java_memory: '5G'
+            CREATE_INDEX: True
+
+
+__TASK_REMOVE_MERGED_BAM__:
+    reserved:
+        component_name: 'delete_files'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0.0'
+    run:
+        use_cluster: False
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_PICARD_ADD_OR_REPLACE_READ_GROUPS__']
+        add_breakpoint: False
+    component:
+        input_files:
+            files: ("__TASK_SAMTOOLS_MERGE__", "output_file")
+            input_dir: 
+
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 7  ----------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__TASK_GATK_REALIGNER_TARGET_CREATOR__:
+    reserved:
+        component_name: 'gatk_realigner_target_creator'
+        component_version: 'v1.0.0'
+        seed_version: '3.4-0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '8G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_PICARD_MARK_DUPLICATES__']
+        add_breakpoint: False
+    component:
+        input_files:
+            input_file: ("__TASK_PICARD_MARK_DUPLICATES__", "OUTPUT")
+            reference_sequence: ("__SHARED__", "gatk_reference")
+        output_files:
+            out: "7-gatk_realigner_target_creator/$sample_id.realigner_targets.intervals"
+        parameters:
+            java_memory: '5G'
+            analysis_type: 'RealignerTargetCreator'
+
+
+__TASK_REMOVE_READGROUP_BAM__:
+    reserved:
+        component_name: 'delete_files'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0.0'
+    run:
+        use_cluster: False
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_PICARD_MARK_DUPLICATES__']
+        add_breakpoint: False
+    component:
+        input_files:
+            files: ("__TASK_PICARD_ADD_OR_REPLACE_READ_GROUPS__", "OUTPUT")
+            input_dir:
+
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 8  ----------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__TASK_GATK_INDEL_REALIGNER__:
+    reserved:
+        component_name: 'gatk_indel_realigner'
+        component_version: 'v1.0.0'
+        seed_version: '3.4-0'
+    run:
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '8G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_PICARD_MARK_DUPLICATES__', '__TASK_GATK_REALIGNER_TARGET_CREATOR__']
+        add_breakpoint: False
+    component:
+        input_files:
+            input_file: ("__TASK_PICARD_MARK_DUPLICATES__", "OUTPUT")
+            targetIntervals: ("__TASK_GATK_REALIGNER_TARGET_CREATOR__", "out")
+            reference_sequence: ("__SHARED__", "gatk_reference")
+        output_files:
+            out: "8-gatk_indel_realigner/$sample_id.merge.rg.mdups.realn.bam"
+        parameters:
+            analysis_type: 'IndelRealigner'
+            java_memory: '5G'
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 9  ----------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__TASK_BAMUTIL_CLIPOVERLAP__:
+    reserved:
+        # do not change this section.
+        component_name: 'clipoverlap'
+        component_version: '1.0.0'
+        seed_version: '2.16'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '4G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_GATK_INDEL_REALIGNER__']
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            input_file: ("__TASK_GATK_INDEL_REALIGNER__", "out")
+        output_files:
+            output_file: "9-bamutil_clipoverlap/$sample_id.merge.rg.mdups.realn.clipolap.bam"
+        parameters:
+
+__TASK_REMOVE_MARK_DUPLICATES_BAM__:
+    reserved:
+        component_name: 'delete_files'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0.0'
+    run:
+        use_cluster: False
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_GATK_INDEL_REALIGNER__']
+        add_breakpoint: False
+    component:
+        input_files:
+            files: ("__TASK_PICARD_MARK_DUPLICATES__", "OUTPUT")
+            input_dir:
+
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 10  ---------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__TASK_SAMTOOLS_INDEX__:
+    reserved:
+        # do not change this section.
+        component_name: 'samtools_index'
+        component_version: 'v1.0.0'
+        seed_version: 'v0.1.19'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: ("__SHARED__", "use_cluster")
+        memory: '2G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_BAMUTIL_CLIPOVERLAP__']
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            bam_file: ("__TASK_BAMUTIL_CLIPOVERLAP__", "output_file")
+        output_files:
+        parameters:
+
+
+# -------------------------------------------------------------------------------- #
+# -----------------------------------  Wave 11  ---------------------------------- #
+# -------------------------------------------------------------------------------- #
+
+__TASK_REMOVE_INDEL_REALIGNED_BAM__:
+    reserved:
+        component_name: 'delete_files'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0.0'
+    run:
+        use_cluster: False
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_BAMUTIL_CLIPOVERLAP__']
+        add_breakpoint: False
+    component:
+        input_files:
+            files: ("__TASK_GATK_INDEL_REALIGNER__", "out")
+            input_dir:
