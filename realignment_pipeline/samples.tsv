@@ -1,0 +1,2 @@
+#sample_id	input_bam	interval_file
+MCL-71N	/path/to/bam	/path/to/interval_file
