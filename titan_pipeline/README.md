@@ -12,7 +12,8 @@ These are included in the repository.
 3. Currently, there is a bug in Kronos that causes all values in the setup 
 file to be parsed as strings. 
 This causes problems when components such as `run_titan` expect a list but 
-receive a string. For now, the list is hard-coded in the `tasks.yaml` file. 
+receive a string. For now, the list is hard-coded in the `tasks.yaml` file 
+under the `SHARED` section.
 See: https://www.bcgsc.ca/jira/browse/PFD-552. 
 
 4. By default, this pipeline is meant for exomes. If you wish to run 

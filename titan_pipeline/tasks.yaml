@@ -1,3 +1,7 @@
+__SHARED__:
+    chromosomes: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y]
+
+
 __TASK_MUTATIONSEQ__:
     reserved:
         # do not change this section
@@ -18,7 +22,7 @@ __TASK_MUTATIONSEQ__:
         input_files:
             tumour: ('__SAMPLES__', 'tumour_bam')
             reference: ('__SHARED__', 'reference')
-            positions_file: ('__SHARED__', 'positions_file')
+            positions_file: null
             normal: ('__SAMPLES__', 'normal_bam')
             model: ('__SHARED__','model')
             config: 'metadata.config'
@@ -37,8 +41,31 @@ __TASK_MUTATIONSEQ__:
             no_filter: False
             normalized: False
             coverage: 4
-            threshold: 0.50
+            threshold: 0.85
             buffer_size: '2G'
+
+
+__TASK_CONVERT_VCF2COUNTS__:
+    reserved:
+        # do not change this section
+        component_name: 'convert_museq_vcf2counts'
+        component_version: '1.1.2'
+        seed_version: '1.1.0'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: '10G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        boilerplate: ("__SHARED__", "setup_env")
+    component:
+        input_files:
+            infile: ('__TASK_MUTATIONSEQ__', 'out')
+            positions_file: ('__SHARED__', 'positions_file')
+        output_files:
+            outfile: '1-mutationseq/$sample_id.snvs.counts.txt'
+        parameters:
 
 
 __TASK_READCOUNTER_TUMOUR__:
@@ -63,7 +90,7 @@ __TASK_READCOUNTER_TUMOUR__:
         parameters:
             q: '0'
             w: '1000'
-            chromosomes: null
+            chromosomes: ('__SHARED__','chromosomes')
             run_component: True
 
 
@@ -89,7 +116,7 @@ __TASK_READCOUNTER_NORMAL__:
         parameters:
             q: '0'
             w: '1000'
-            chromosomes: null
+            chromosomes: ('__SHARED__','chromosomes')
             run_component: True
 
 
@@ -125,29 +152,6 @@ __TASK_CALC_CORRECTREADS__:
             genome_type: ('__SHARED__','genome_type')
 
 
-__TASK_CONVERT_VCF2COUNTS__:
-    reserved:
-        # do not change this section
-        component_name: 'convert_museq_vcf2counts'
-        component_version: '1.1.2'
-        seed_version: '1.1.0'
-    run:
-        # NOTE: component cannot run in parallel mode.
-        use_cluster: True
-        memory: '5G'
-        num_cpus: 1
-        forced_dependencies: []
-        add_breakpoint: False
-        boilerplate: ("__SHARED__", "setup_env")
-    component:
-        input_files:
-            infile: ('__TASK_MUTATIONSEQ__', 'out')
-            positions_file: null
-        output_files:
-            outfile: '1-mutationseq/$sample_id.snvs.counts.txt'
-        parameters:
-
-
 __TASK_TITAN__:
     reserved:
         # do not change this section
@@ -180,22 +184,23 @@ __TASK_TITAN__:
             txn_z_strength: '1e6'
             norm_est_meth: 'map'
             pseudo_counts: '1e-300'
-            num_cores: '1'
+            num_cores: '4'
             n_zero: '0.5'
             myskew: '0'
             max_i: '50'
             alpha_high: '20000'
             bool_est_ploidy: 'TRUE'
             sym: 'TRUE'
-            alpha_k: '2500'
+            alpha_k: '15000'
             txn_exp_len: '1e16'
-            num_clusters: "1"
-            ploidy: 2
+            num_clusters: null
+            ploidy: null
             maxcn: '8'
             id: $sample_id
             genome_type: ('__SHARED__','genome_type')
-            chromosomes: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y]
+            chromosomes: ('__SHARED__','chromosomes')
             y_threshold: ('__SHARED__','y_threshold')
+            max_depth: '1000'
 
 
 __TASK_CALC_CNSEGMENTS__:
@@ -278,5 +283,6 @@ __TASK_PLOT_TITAN__:
         parameters:
             num_clusters: null
             chr: null
+            ploidy: null
             id: $sample_id
             rid: $run_id
