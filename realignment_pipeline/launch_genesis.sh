@@ -1,9 +1,11 @@
+VERSION="6.1"
+COMPONENT_VERSION="8.0"
 /extscratch/morinlab/software/anaconda/2.3.0/envs/kronos-2.0.4/bin/kronos run \
--y realignment_pipeline_linear.yaml \
+-y /extscratch/morinlab/software/pipelines_morinlab/$VERSION/realignment_pipeline/realignment_pipeline_linear.yaml \
 -w ./ \
 -i samples.tsv \
--s setup.GRCh38_no_alt.genesis.tsv \
--c ~/repos/pipeline-components/ \
+-s /extscratch/morinlab/software/pipelines_morinlab/$VERSION/realignment_pipeline/setup.GRCh38_no_alt.genesis.tsv \
+-c /extscratch/morinlab/software/pipeline_components_morinlab/$COMPONENT_VERSION/ \
 -b sge \
 --num_pipelines 10 \
 -j 400 \
