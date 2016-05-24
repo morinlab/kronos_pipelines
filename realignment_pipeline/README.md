@@ -36,7 +36,7 @@
 
 	```bash
 	screen
-	# You might have to click Enter after running screen.
+	# You might have to hit Enter after running screen.
 	sh launch_genesis.sh
 	```
 
@@ -47,6 +47,6 @@
 	```bash
 	[...]
 	--qsub_options ' -pe ncpus {num_cpus} -l mem_free={mem} -l mem_token={mem} -l h_vmem={mem} -w n -S /bin/sh' \
-  --no_prefix \
-  --run_id "2016-05-20_11-57-05"
+  	--no_prefix \
+  	--run_id "2016-05-20_11-57-05"
 	```
