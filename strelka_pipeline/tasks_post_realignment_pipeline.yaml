@@ -1,0 +1,99 @@
+__TASK_STRELKA__:
+    reserved:
+        # do not change this section.
+        component_name: 'strelka'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0.14'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: '1G'
+        num_cpus: 12
+        forced_dependencies:
+        add_breakpoint: False
+        env_vars:
+        boilerplate: ("__SHARED__", "setup_env")
+    component:
+        input_files:
+            reference: ("__SHARED__", "reference")
+            normal_bam: ("__SAMPLES__", "normal_bam")
+            tumour_bam: ("__SAMPLES__", "tumour_bam")
+            config_file: ("__SHARED__", "strelka_config")
+        output_files:
+            passed_snvs_vcf: "1-strelka/$sample_id.strelka_passed_snvs.vcf"
+            output_dir: "1-strelka/strelka_output"
+            passed_indels_vcf: "1-strelka/$sample_id.strelka_passed_indels.vcf"
+        parameters:
+            num_threads: 12
+
+
+__TASK_VCF2MAF_SNVS__:
+    reserved:
+        # do not change this section.
+        component_name: 'vcf2maf_1_6_2'
+        component_version: 'v1.0.0'
+        seed_version: '1.6.2'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: ("__SHARED__", "vep_mem")
+        num_cpus: ("__SHARED__", "vep_threads")
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate: ("__SHARED__", "setup_env")
+    component:
+        input_files:
+            vep_data: ("__SHARED__", "vep_data_dir")
+            custom_enst: '__OPTIONAL__'
+            ref_fasta: ("__SHARED__", "reference")
+            input_vcf: ("__TASK_STRELKA__", "passed_snvs_vcf")
+            vep_path: ("__SHARED__", "vep_path")
+        output_files:
+            output_maf: "2-vcf2maf/$sample_id.snvs.passed.maf"
+        parameters:
+            min_hom_vaf: '__OPTIONAL__'
+            ncbi_build: ("__SHARED__", "vep_ncbi_build")
+            maf_center: '__OPTIONAL__'
+            vcf_tumor_id: 'TUMOR'
+            vep_forks: ("__SHARED__", "vep_threads")
+            tumor_id: ("__SAMPLES__", "tumour_id")
+            normal_id: ("__SAMPLES__", "normal_id")
+            species: ("__SHARED__", "vep_species")
+            vcf_normal_id: 'NORMAL'
+
+
+__TASK_VCF2MAF_INDELS__:
+    reserved:
+        # do not change this section.
+        component_name: 'vcf2maf_1_6_2'
+        component_version: 'v1.0.0'
+        seed_version: '1.6.2'
+    run:
+        # NOTE: component cannot run in parallel mode.
+        use_cluster: True
+        memory: ("__SHARED__", "vep_mem")
+        num_cpus: ("__SHARED__", "vep_threads")
+        forced_dependencies: ["__TASK_VCF2MAF_SNVS__"]
+        add_breakpoint: False
+        env_vars:
+        boilerplate: ("__SHARED__", "setup_env")
+    component:
+        input_files:
+            vep_data: ("__SHARED__", "vep_data_dir")
+            custom_enst: '__OPTIONAL__'
+            ref_fasta: ("__SHARED__", "reference")
+            input_vcf: ("__TASK_STRELKA__", "passed_indels_vcf")
+            vep_path: ("__SHARED__", "vep_path")
+        output_files:
+            output_maf: "2-vcf2maf/$sample_id.indels.passed.maf"
+        parameters:
+            min_hom_vaf: '__OPTIONAL__'
+            ncbi_build: ("__SHARED__", "vep_ncbi_build")
+            maf_center: '__OPTIONAL__'
+            vcf_tumor_id: 'TUMOR'
+            vep_forks: ("__SHARED__", "vep_threads")
+            tumor_id: ("__SAMPLES__", "tumour_id")
+            normal_id: ("__SAMPLES__", "normal_id")
+            species: ("__SHARED__", "vep_species")
+            vcf_normal_id: 'NORMAL'
