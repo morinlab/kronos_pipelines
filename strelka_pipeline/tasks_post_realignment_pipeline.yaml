@@ -9,7 +9,7 @@ __TASK_STRELKA__:
         use_cluster: True
         memory: '1G'
         num_cpus: 12
-        forced_dependencies:
+        forced_dependencies: []
         add_breakpoint: False
         env_vars:
         boilerplate: ("__SHARED__", "setup_env")
