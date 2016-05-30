@@ -10,4 +10,5 @@ COMPONENT_VERSION="8.0"
 --num_pipelines 10 \
 -j 20 \
 -p /extscratch/morinlab/software/anaconda/2.3.0/envs/kronos-2.0.4/bin/python2.7 \
---qsub_options ' -pe ncpus {num_cpus} -l mem_free={mem} -l mem_token={mem} -l h_vmem={mem} -w n -S /bin/sh'
+--qsub_options ' -pe ncpus {num_cpus} -l mem_free={mem} -l mem_token={mem} -l h_vmem={mem} -w n -S /bin/sh' \
+--no_prefix
