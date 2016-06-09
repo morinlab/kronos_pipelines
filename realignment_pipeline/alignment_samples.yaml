@@ -1,0 +1,2 @@
+#sample_id	fastq_R1	fastq_R2
+MCL-71N	/path/to/R1.fastq.gz	/path/to/R2.fastq.qz
