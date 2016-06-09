@@ -1,5 +1,5 @@
 VERSION="6.1"
-COMPONENT_VERSION="8.0"
+COMPONENT_VERSION="9.0"
 /extscratch/morinlab/software/anaconda/2.3.0/envs/kronos-2.1.0_beta/bin/kronos run \
 -y /extscratch/morinlab/software/pipelines_morinlab/$VERSION/realignment_pipeline/realignment_pipeline_linear.yaml \
 -w ./ \

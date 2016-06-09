@@ -1,6 +1,9 @@
-# Realignment Pipeline
+# Realignment pipeline
 
-## Running the pipeline
+This pipeline can be used for *realignment* of BAM files or *alignment* of FASTQ files.
+
+
+## Running the pipeline for realignment of BAM files
 
 1. Create a new working directory.
 
@@ -50,3 +53,10 @@
   	--no_prefix \
   	--run_id "2016-05-20_11-57-05"
 	```
+
+## Running the pipeline for alignment of FASTQ files
+
+Usage is similar to the above, with some main differences:
+- Use the `alignment_samples.tsv` template instead of `samples.tsv` and include paths for both your `read1.fastq.gz` and `read2.fastq.gz` files for each sample
+- In `launch_genesis.sh`, update the `-y` YAML tasks file to use `alignment_pipeline.yaml`
+- There is no need for interval files, and there are no forced breakpoints during the pipeline

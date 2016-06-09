@@ -1,18 +1,17 @@
 __PIPELINE_INFO__:
-    name: 'REALIGN'
+    name: 'ALIGN'
     version: 'v1.0.0'
-    author: 'ppararaj <ppararaj@sfu.ca>'
+    author: 'selin jessa <selinjessa@gmail.com>'
     data_type: 'BAM'
-    input_type: 'BAM'
+    input_type: 'FASTQ'
     output_type: 'BAM'
     host_cluster: 'genesis'
-    date_created: '22 DECEMBER 2015'
-    date_last_updated: '3 January 2015'
+    date_created: '08 JUNE 2016'
+    date_last_updated: '08 JUNE 2016'
     factory_version: '2.0.4'
 
-## realignment_pipeline_linear.yaml modified by Selin Jessa
+## realignment_pipeline_linear.yaml modified
 ## to run BWA MEM alignment for FASTQ files and omit unneeded steps
-## June 2016
 
 # -------------------------------------------------------------------------------- #
 # -----------------------------------  Wave 1  ----------------------------------- #
@@ -27,7 +26,7 @@ __TASK_BWA_MEM__:
         seed_version: 'v0.7.10'
     run: 
         # NOTE: component cannot run in parallel mode.
-        use_cluster: False
+        use_cluster: ("__SHARED__", "use_cluster")
         memory: '6G'
         num_cpus: 1
         forced_dependencies: []
@@ -56,16 +55,16 @@ __TASK_SAMTOOLS_SORT__:
         seed_version: 'v1.2'
     run: 
         # NOTE: component cannot run in parallel mode.
-        use_cluster: False
+        use_cluster: ("__SHARED__", "use_cluster")
         memory: '6G'
         num_cpus: 1
-        forced_dependencies: []
+        forced_dependencies: ['__TASK_BWA_MEM__']
         add_breakpoint: False
         env_vars: 
         boilerplate: 
     component: 
         input_files: 
-            input_bam: ('__TASK_SAMTOOLS_SORT__', 'output_bam')
+            input_bam: ('__TASK_BWA_MEM__', 'output_bam')
         output_files: 
             output_bam: "2-samtools_sort/$sample_id.sorted.bam"
 
@@ -103,7 +102,7 @@ __TASK_PICARD_ADD_OR_REPLACE_READ_GROUPS__:
         use_cluster: ("__SHARED__", "use_cluster")
         memory: '8G'
         num_cpus: ('__SHARED__', 'num_cpus')
-        forced_dependencies: []
+        forced_dependencies: ['__TASK_SAMTOOLS_SORT__']
         add_breakpoint: False
     component:
         input_files:
