@@ -4,7 +4,7 @@ __GENERAL__	samtools	/extscratch/morinlab/software/samtools/1.2/bin/samtools
 __GENERAL__	bamhash_checksum_bam	LD_LIBRARY_PATH=/gsc/software/linux-x86_64-centos5/gcc-4.9.1/lib64/ /home/prasathp/repos/BamHash/bamhash_checksum_bam
 __GENERAL__	hash_read_names	/home/prasathp/repos/lab_scripts/hash_read_names/hash_read_names.py
 __GENERAL__	bwa	/extscratch/morinlab/software/bwa/0.7.6a/bin/bwa
-__GENERAL__	pysam_bam2fq	/home/prasathp/repos/lab_scripts/pysam_bam2fq/pysam_bam2fq.py
+__GENERAL__	pysam_bam2fq	/extscratch/morinlab/software/lab_scripts/11.2/pysam_bam2fq/pysam_bam2fq.py
 __GENERAL__	picard_binary	/extscratch/morinlab/software/picard_tools/1.136/picard.jar
 __GENERAL__	gatk_binary	/extscratch/morinlab/software/gatk/3.4-0/GenomeAnalysisTK.jar
 __GENERAL__	java_binary	/gsc/software/linux-x86_64-centos5/java-1.7.0-u13/bin/java
