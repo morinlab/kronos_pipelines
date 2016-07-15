@@ -1,0 +1,18 @@
+#section	key	value
+__GENERAL__	mutationseq	/projects/NCI_Burkitts/software/centos-6/mutationseq-4.3.7/museq
+__GENERAL__	perl	/projects/NCI_Burkitts/software/centos-6/perl-5.23.6/bin/perl
+__GENERAL__	python	/projects/NCI_Burkitts/software/centos-6/anaconda-2.3.0/envs/mutationseq-4.3.7/bin/python
+__GENERAL__	R	/projects/NCI_Burkitts/software/centos-6/R-3.2.3-gsc/bin/R
+__SHARED__	gc	/projects/rmorin/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Annotation/GC_Content/GRCh37-lite.gc.ws_1000.wig
+__SHARED__	genome_type	NCBI
+__SHARED__	map	/projects/rmorin/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Annotation/Mappability/GRCh37-lite.map.ws_1000.wig
+__SHARED__	model	model_single_v4.0.2.npz
+__SHARED__	mutationseq_intervals	mutationseq_intervals.GRCh37-lite.txt
+__SHARED__	positions_file	/projects/rmorin/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Annotation/Variation/common_all_dbSNP138.pos
+__SHARED__	r_libs	/projects/NCI_Burkitts/software/centos-6/R_libs
+__SHARED__	reference	/projects/rmorin/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Sequence/WholeGenomeFasta/GRCh37-lite.fa
+__SHARED__	setup_env	. /projects/rmorin/software/centos-6/env.sh
+__SHARED__	target_list	NULL
+__SHARED__	titan_intervals	titan_intervals.txt
+__SHARED__	use_cluster	False
+__SHARED__	y_threshold	20

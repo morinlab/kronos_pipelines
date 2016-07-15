@@ -1,20 +1,23 @@
 # TITAN Pipeline
 
-## Notes
+## Launch the TITAN pipeline
 
-1. Select the `setup.tsv` file that matches the human genome build used in the 
-input BAM files. 
+Read the [general instructions](../README.md) in the main README for launching a Kronos pipeline. Below are notes specific to the TITAN pipeline that you should also read. 
 
-2. You might have to update the `mutationseq_intervals` and `titan_intervals` 
-variables in the setup.tsv file to point to the appropriate locations. 
-These are included in the repository. 
+## Notes about the TITAN pipeline
 
-3. Currently, there is a bug in Kronos that causes all values in the setup 
-file to be parsed as strings. 
-This causes problems when components such as `run_titan` expect a list but 
-receive a string. For now, the list is hard-coded in the `tasks.yaml` file 
-under the `SHARED` section.
-See: https://www.bcgsc.ca/jira/browse/PFD-552. 
+1. In the setup file, you need to update the values of `mutationseq_intervals` and `titan_intervals` to the absolute paths to the files included in the repository. Also, make sure you select the appropriate version of `mutationseq_intervals` (_e.g._ GRCh37 versus GRCh38). 
 
-4. By default, this pipeline is meant for exomes. If you wish to run 
-it on genomes, you have to set `target_list` in the setup file to `NULL`. 
+2. There's currently a bug that forces us to place the `chromosomes` shared attribute in the `tasks.yaml` file instead of the setup file. You need to update this once again according to the human reference you're using. For instance, change the default value to the following if you are using GRCh37.
+
+    ```
+    [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y]
+    ```
+
+3. By default, this pipeline is meant for whole genome sequencing data. If you wish to run TITAN on exomes, you need to update the `target_list` shared attribute in the setup file from `NULL` to a BED file of exons. For instance, the BED files for the target regions in the Agilent exom capture kit is located here:
+
+    ```
+    /projects/rmorin/reference/igenomes/Homo_sapiens/GSC/GRCh37-lite/Annotation/Exons/agilent_sureselect_all_exons_v5_and_utr.sort.merge.bed
+    ```
+
+4. If you want to run the pipeline on a cluster, change the value of the `use_cluster` shared attribute in the setup file to `True` and make sure you launch the pipeline on a SGE submission host. 

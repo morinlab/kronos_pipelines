@@ -6,43 +6,19 @@ This repository contains Kronos pipelines used by the Morin lab.
 
 Here's a quick guide on how to launch your own pipeline. 
 
-1. Create a new directory named after the pipeline you're interested in running, _e.g._ `titan_pipeline`. 
+1. Create a new empty directory for the Kronos pipeline. 
 
-	```bash
-	mkdir titan_pipeline
-	cd titan_pipeline
-	```
-
-2. Copy the `samples.tsv` and `launch.sh` files for the pipeline you're interested in running in the directory you just created. 
+2. Copy the `launch.sh`, `tasks.yaml`, `samples.tsv` and setup files in the new directory. You should also copy any additional pipeline-specific files. See the notes for each individual pipeline for more details. 
 	
-	```bash
-	cp /extscratch/morinlab/software/pipelines_morinlab/3.0/titan_pipeline/{samples.tsv,launch.sh} .
-	```
-	
-3. Add your sample information to the `samples.tsv` file. 
+3. Complete the `samples.tsv` file. Each line corresponds to a different sample and will be run in parallel up to the maximum number of pipelines specified in `launch.sh` (via the `--num_pipelines` parameter). Use tabs to separate your columns, and don't delete or change the header line. 
 
-	1. Don't forget to use tabs to separate your columns.
-	2. Add all of your samples to your `samples.tsv` file. 
-	3. Include the header line. 
+4. Update the `launch.sh` file accordingly:
 
-4. Update the `launch.sh` file, if need be. 
+    1. Update your Python/Kronos paths. Use absolute paths. 
+    2. Update your components directory path. Use absolute path. 
+    3. Update the setup file name. You don't need to use the absolute path.
+    4. Update the qsub options. For instance, add the appropriate qsub flags to submit to a specific SGE queue. 
 
-	1. If you need to use a later version of the pipeline components, update `--components_dir` accordingly. 
-	2. Update the version number at the top of `launch.sh` to whatever version you are currently using to ensure you are using the latest config and setup files. 
-	3. If you are using an environment other than Genesis, you need to update `--setup_file` accordingly. There might be another setup file in the repository that you could use. Otherwise, you'll have to create one. Consider adding it to the repository so that others can benefit from it. If you want help, open an issue on GitHub. 
+5. Run `sh launch.sh` from within the directory you created above to launch your pipeline. If you run the script from another directory, make sure to update the paths in your `launch.sh` file accordingly. **Hint:** Use `screen` or `tmux` to make sure the pipeline continues running in case your shell connection dies. 
 
-5. Launch your pipeline! **Hint:** use `screen` so that the pipeline continues running after you close your terminal. If you disconnect from `screen`, you can reconnect by running `screen -r`. 
-
-	```bash
-	screen
-	# You might have to click Enter after running screen.
-	sh launch.sh
-	```
-
-6. **Bonus:** If your pipeline fails at any point, you may perform any required fixes and relaunch it such that it resumes where it left off. All you need to do is add the run ID (_e.g._ 2016-01-14_17-07-35) in `launch.sh` using the `--run_id` argument. **Note:** Don't forget the trailing backslash on the previous line. 
-
-	```bash
-	[...]
-	--qsub_options ' -pe ncpus {num_cpus} -l mem_free={mem} -l mem_token={mem} -l h_vmem={mem} -w n' \
-	--run_id "2016-01-14_17-07-35"
-	```
+6. If your pipeline fails at any point, you may perform any required fixes and relaunch it so that it resumes where it left off. All you need to do is add the run ID to the Kronos command in `launch.sh` using the `--run_id` parameter. The run ID is the name of the directory that was created by Kronos (usually a date and time) to contain your output files, such as `2016-01-14_17-07-35`. 
