@@ -1,0 +1,86 @@
+__TASK_SAMTOOLS_MPILEUP_NORMAL__:
+    reserved:
+        component_name: 'samtools_mpileup'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.2'
+    run:
+        use_cluster: True
+        memory: '8G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            input_bam: ("__SAMPLES__", "normal_bam")
+        output_files:
+            output_pileup: '1-samtools_mpileup/normal.pileup'
+        parameters:
+            f: ("__SHARED__", "reference")
+            l: ("__SHARED__", "positions")
+            q: 1
+
+__TASK_SAMTOOLS_MPILEUP_TUMOUR__:
+    reserved:
+        component_name: 'samtools_mpileup'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.2'
+    run:
+        use_cluster: True
+        memory: '8G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            input_bam: ("__SAMPLES__", "tumour_bam")
+        output_files:
+            output_pileup: '1-samtools_mpileup/tumour.pileup'
+        parameters:
+            f: ("__SHARED__", "reference")
+            l: ("__SHARED__", "positions")
+            q: 1
+
+__TASK_VARSCAN2_SOMATIC__:
+    reserved:
+        component_name: 'varscan2_somatic'
+        component_version: 'v1.0.0'
+        seed_version: 'v2.3.9'
+    run:
+        use_cluster: True
+        memory: '8G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            normal_pileup: ("__TASK_SAMTOOLS_MPILEUP_NORMAL__", "output_pileup")
+            tumour_pileup: ("__TASK_SAMTOOLS_MPILEUP_TUMOUR__", "output_pileup")
+        output_files:
+            output_basename: "2-varscan2_somatic/$sample_id"
+        parameters:
+            varscan2_command: 'somatic'
+            output_vcf: '1'
+            java_memory: '2G'
+
+__TASK_REMOVE_PILEUP_FILES__:
+    reserved:
+        component_name: 'delete_files'
+        component_version: 'v1.0.0'
+        seed_version: 'v1.0.0'
+    run:
+        use_cluster: False
+        memory: '1G'
+        num_cpus: 1
+        forced_dependencies: ['__TASK_VARSCAN2_SOMATIC__']
+        add_breakpoint: False
+    component:
+        input_files:
+            input_dir: "1-samtools_mpileup/"
+        parameters:
+            file_extension: "*.pileup"

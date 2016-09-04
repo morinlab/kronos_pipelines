@@ -1,0 +1,6 @@
+#section	key	value
+__GENERAL__	samtools	/projects/rmorin/software/centos-6/samtools/1.2/bin/samtools
+__GENERAL__	java_binary	/gsc/software/linux-x86_64-centos6/jdk1.8.0_91/bin/java
+__GENERAL__	varscan2_binary	/projects/rmorin/software/centos-6/varscan2/2.3.9/VarScan.v2.3.9.jar
+__SHARED__	reference	/projects/rmorin/reference/igenomes/Homo_sapiens/GSC/GRCh38/Sequence/WholeGenomeFasta/GRCh38_no_alt.fa
+__SHARED__	positions	/projects/rmorin/reference/igenomes/Homo_sapiens/GSC/GRCh38/Annotation/Exons/agilent_sureselect_all_exons_v5_and_utr.sort.merge.bed
