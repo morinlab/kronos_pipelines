@@ -1,6 +1,6 @@
 /projects/rmorin/software/centos-6/anaconda/4.1.0/envs/kronos-2.1.0/bin/kronos \
     run \
-        --input_samples "samples.tsv" \
+        --input_samples "samples_test.tsv" \
         --working_dir "working_dir/" \
         --config_file "tasks.yaml" \
         --setup_file "setup.GRCh38_no_alt.exomes.login-apollo.tsv" \

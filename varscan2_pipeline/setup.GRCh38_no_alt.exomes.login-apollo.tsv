@@ -2,5 +2,15 @@
 __GENERAL__	samtools	/projects/rmorin/software/centos-6/samtools/1.2/bin/samtools
 __GENERAL__	java_binary	/gsc/software/linux-x86_64-centos6/jdk1.8.0_91/bin/java
 __GENERAL__	varscan2_binary	/projects/rmorin/software/centos-6/varscan2/2.3.9/VarScan.v2.3.9.jar
+__GENERAL__	perl	/projects/rmorin/software/centos-6/perlbrew/0.74/perls/perl-5.23.6/bin/perl
+__GENERAL__	python	/projects/rmorin/software/centos-6/anaconda/2.3.0/bin/python
+__GENERAL__	vcf2maf.pl	/projects/rmorin/software/centos-6/vcf2maf/1.6.7/vcf2maf.pl
 __SHARED__	reference	/projects/rmorin/reference/igenomes/Homo_sapiens/GSC/GRCh38/Sequence/WholeGenomeFasta/GRCh38_no_alt.fa
 __SHARED__	positions	/projects/rmorin/reference/igenomes/Homo_sapiens/GSC/GRCh38/Annotation/Exons/agilent_sureselect_all_exons_v5_and_utr.sort.merge.bed
+__SHARED__	vep_path	/projects/rmorin/software/centos-6/ensembl_tools/83/scripts/variant_effect_predictor/
+__SHARED__	vep_data_dir	/projects/rmorin/reference/ensembl_vep_cache
+__SHARED__	vep_species	homo_sapiens
+__SHARED__	vep_ncbi_build	GRCh38
+__SHARED__	vep_mem	4G
+__SHARED__	vep_threads	8
+__SHARED__	setup_env	. /projects/rmorin/software/env.sh

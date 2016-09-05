@@ -63,6 +63,8 @@ __TASK_VARSCAN2_SOMATIC__:
             tumour_pileup: ("__TASK_SAMTOOLS_MPILEUP_TUMOUR__", "output_pileup")
         output_files:
             output_basename: "2-varscan2_somatic/$sample_id"
+            output_snp: "2-varscan2_somatic/$sample_id.snp.vcf"
+            output_indel: "2-varscan2_somatic/$sample_id.indel.vcf"
         parameters:
             varscan2_command: 'somatic'
             output_vcf: '1'
@@ -84,3 +86,124 @@ __TASK_REMOVE_PILEUP_FILES__:
             input_dir: "1-samtools_mpileup/"
         parameters:
             file_extension: "*.pileup"
+
+__TASK_VARSCAN2_PROCESSSOMATIC_SNP__:
+    reserved:
+        component_name: 'varscan2_processSomatic'
+        component_version: 'v1.0.0'
+        seed_version: 'v2.3.9'
+    run:
+        use_cluster: True
+        memory: '8G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            varscan2_somatic_output: ("__TASK_VARSCAN2_SOMATIC__", "output_snp")
+        output_files:
+            somatic_output: "3-varscan_processSomatic/$sample_id.snp.Somatic.vcf"
+            somatic_hc_output: "3-varscan_processSomatic/$sample_id.snp.Somatic.hc.vcf"
+            germline_output: "3-varscan_processSomatic/$sample_id.snp.Germline.vcf"
+            germline_hc_output: "3-varscan_processSomatic/$sample_id.snp.Germline.hc.vcf"
+            loh_output: "3-varscan_processSomatic/$sample_id.snp.LOH.vcf"
+            loh_hc_output: "3-varscan_processSomatic/$sample_id.snp.LOH.hc.vcf"
+        parameters:
+            varscan2_command: 'processSomatic'
+            java_memory: '2G'
+
+__TASK_VARSCAN2_PROCESSSOMATIC_INDEL__:
+    reserved:
+        component_name: 'varscan2_processSomatic'
+        component_version: 'v1.0.0'
+        seed_version: 'v2.3.9'
+    run:
+        use_cluster: True
+        memory: '8G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            varscan2_somatic_output: ("__TASK_VARSCAN2_SOMATIC__", "output_indel")
+        output_files:
+            somatic_output: "3-varscan_processSomatic/$sample_id.indel.Somatic.vcf"
+            somatic_hc_output: "3-varscan_processSomatic/$sample_id.indel.Somatic.hc.vcf"
+            germline_output: "3-varscan_processSomatic/$sample_id.indel.Germline.vcf"
+            germline_hc_output: "3-varscan_processSomatic/$sample_id.indel.Germline.hc.vcf"
+            loh_output: "3-varscan_processSomatic/$sample_id.indel.LOH.vcf"
+            loh_hc_output: "3-varscan_processSomatic/$sample_id.indel.LOH.hc.vcf"
+        parameters:
+            varscan2_command: 'processSomatic'
+            java_memory: '2G'
+
+__TASK_VCF2MAF_SNVS__:
+    reserved:
+        component_name: 'vcf2maf_1_6_2'
+        component_version: 'v1.0.0'
+        seed_version: '1.6.2'
+    run:
+        use_cluster: True
+        memory: ("__SHARED__", "vep_mem")
+        num_cpus: ("__SHARED__", "vep_threads")
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate: ("__SHARED__", "setup_env")
+    component:
+        input_files:
+            vep_data: ("__SHARED__", "vep_data_dir")
+            custom_enst: '__OPTIONAL__'
+            ref_fasta: ("__SHARED__", "reference")
+            input_vcf: ("__TASK_VARSCAN2_PROCESSSOMATIC_SNP__", "somatic_hc_output")
+            vep_path: ("__SHARED__", "vep_path")
+        output_files:
+            output_maf: "4-vcf2maf/$sample_id.snvs.somatic.maf"
+        parameters:
+            min_hom_vaf: '__OPTIONAL__'
+            ncbi_build: ("__SHARED__", "vep_ncbi_build")
+            maf_center: '__OPTIONAL__'
+            vcf_tumor_id: 'TUMOR'
+            vep_forks: ("__SHARED__", "vep_threads")
+            tumor_id: ("__SAMPLES__", "tumour_id")
+            normal_id: ("__SAMPLES__", "normal_id")
+            species: ("__SHARED__", "vep_species")
+            vcf_normal_id: 'NORMAL'
+
+__TASK_VCF2MAF_INDELS__:
+    reserved:
+        component_name: 'vcf2maf_1_6_2'
+        component_version: 'v1.0.0'
+        seed_version: '1.6.2'
+    run:
+        use_cluster: True
+        memory: ("__SHARED__", "vep_mem")
+        num_cpus: ("__SHARED__", "vep_threads")
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate: ("__SHARED__", "setup_env")
+    component:
+        input_files:
+            vep_data: ("__SHARED__", "vep_data_dir")
+            custom_enst: '__OPTIONAL__'
+            ref_fasta: ("__SHARED__", "reference")
+            input_vcf: ("__TASK_VARSCAN2_PROCESSSOMATIC_INDEL__", "somatic_hc_output")
+            vep_path: ("__SHARED__", "vep_path")
+        output_files:
+            output_maf: "4-vcf2maf/$sample_id.indels.somatic.maf"
+        parameters:
+            min_hom_vaf: '__OPTIONAL__'
+            ncbi_build: ("__SHARED__", "vep_ncbi_build")
+            maf_center: '__OPTIONAL__'
+            vcf_tumor_id: 'TUMOR'
+            vep_forks: ("__SHARED__", "vep_threads")
+            tumor_id: ("__SAMPLES__", "tumour_id")
+            normal_id: ("__SAMPLES__", "normal_id")
+            species: ("__SHARED__", "vep_species")
+            vcf_normal_id: 'NORMAL'
+
