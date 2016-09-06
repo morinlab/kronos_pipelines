@@ -1,6 +1,6 @@
 NAME="seurat_pipeline"
 VERSION="5.0"
-/extscratch/morinlab/software/anaconda/2.3.0/envs/kronos-2.0.4/bin/kronos \
+/projects/rmorin/software/centos-6/anaconda/4.1.0/envs/kronos-2.1.0/bin/kronos \
     run \
         --working_dir "working_dir/" \
         --pipeline_name "$NAME" \
