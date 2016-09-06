@@ -1,0 +1,94 @@
+__TASK_SEURAT__:
+    reserved:
+        component_name: 'seurat'
+        component_version: 'v1.0.0'
+        seed_version: 'v2.5'
+    run:
+        use_cluster: True
+        memory: '8G'
+        num_cpus: 1
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate:
+    component:
+        input_files:
+            I_dna_normal: ("__SAMPLES__", "normal_bam")
+            I_dna_tumor: ("__SAMPLES__", "tumour_bam")
+        output_files:
+            out: '1-seurat/$sample_id.somatic.all.vcf'
+            go: '1-seurat/$sample_id.large_events.txt'
+            output_snv: '1-seurat/$sample_id.somatic.snv.vcf'
+            output_indel: '1-seurat/$sample_id.somatic.indel.vcf'
+        parameters:
+            T: 'Seurat'
+            reference_sequence: ("__SHARED__", "reference")
+            intervals: ("__SHARED__", "intervals")
+            indels: True
+            java_memory: '4G'
+
+__TASK_VCF2MAF_SNVS__:
+    reserved:
+        component_name: 'vcf2maf_1_6_2'
+        component_version: 'v1.0.0'
+        seed_version: '1.6.2'
+    run:
+        use_cluster: True
+        memory: ("__SHARED__", "vep_mem")
+        num_cpus: ("__SHARED__", "vep_threads")
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate: ("__SHARED__", "setup_env")
+    component:
+        input_files:
+            vep_data: ("__SHARED__", "vep_data_dir")
+            custom_enst: '__OPTIONAL__'
+            ref_fasta: ("__SHARED__", "reference")
+            input_vcf: ("__TASK_SEURAT__", "output_snv")
+            vep_path: ("__SHARED__", "vep_path")
+        output_files:
+            output_maf: "2-vcf2maf/$sample_id.snvs.somatic.maf"
+        parameters:
+            min_hom_vaf: '__OPTIONAL__'
+            ncbi_build: ("__SHARED__", "vep_ncbi_build")
+            maf_center: '__OPTIONAL__'
+            vcf_tumor_id: 'TUMOR'
+            vep_forks: ("__SHARED__", "vep_threads")
+            tumor_id: ("__SAMPLES__", "tumour_id")
+            normal_id: ("__SAMPLES__", "normal_id")
+            species: ("__SHARED__", "vep_species")
+            vcf_normal_id: 'NORMAL'
+
+__TASK_VCF2MAF_INDELS__:
+    reserved:
+        component_name: 'vcf2maf_1_6_2'
+        component_version: 'v1.0.0'
+        seed_version: '1.6.2'
+    run:
+        use_cluster: True
+        memory: ("__SHARED__", "vep_mem")
+        num_cpus: ("__SHARED__", "vep_threads")
+        forced_dependencies: []
+        add_breakpoint: False
+        env_vars:
+        boilerplate: ("__SHARED__", "setup_env")
+    component:
+        input_files:
+            vep_data: ("__SHARED__", "vep_data_dir")
+            custom_enst: '__OPTIONAL__'
+            ref_fasta: ("__SHARED__", "reference")
+            input_vcf: ("__TASK_SEURAT__", "output_indel")
+            vep_path: ("__SHARED__", "vep_path")
+        output_files:
+            output_maf: "2-vcf2maf/$sample_id.indels.somatic.maf"
+        parameters:
+            min_hom_vaf: '__OPTIONAL__'
+            ncbi_build: ("__SHARED__", "vep_ncbi_build")
+            maf_center: '__OPTIONAL__'
+            vcf_tumor_id: 'TUMOR'
+            vep_forks: ("__SHARED__", "vep_threads")
+            tumor_id: ("__SAMPLES__", "tumour_id")
+            normal_id: ("__SAMPLES__", "normal_id")
+            species: ("__SHARED__", "vep_species")
+            vcf_normal_id: 'NORMAL'
